@@ -44,7 +44,7 @@ jobs:
           curl --fail --location --proto '=https' "$BASE_URL" -o base.img
           if [[ "$BASE_URL" == *.xz ]]; then mv base.img base.img.xz; fi
           sudo apt-get update
-          sudo apt-get install -y libguestfs-tools qemu-utils xz-utils acl
+          sudo apt-get install -y libguestfs-tools qemu-utils xz-utils acl dhcpcd-base
           # Noble's passt profile rejects guestfs PID files. Use libguestfs's
           # built-in QEMU user networking fallback on this disposable builder.
           sudo apt-get remove -y passt

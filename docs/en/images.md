@@ -20,7 +20,7 @@ Pi 4 and 5 are separately named and accepted even when the upstream base support
 Use a Linux builder of the **same CPU architecture** as the image with enough disk space for the uncompressed input, output and libguestfs appliance. A VM is acceptable for construction. Install `libguestfs-tools qemu-utils xz-utils python3`, obtain the official image and its official `SHA256SUMS`, then supply the exact hash. Use the architecture-matched service ELF from the same project release.
 
 ```bash
-sudo apt install libguestfs-tools qemu-utils xz-utils python3
+sudo apt install libguestfs-tools qemu-utils xz-utils python3 dhcpcd-base
 bash scripts/images/build-image.sh \
   --platform x86_64 \
   --base /work/noble-server-cloudimg-amd64.img \
