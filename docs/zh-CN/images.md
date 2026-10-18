@@ -6,6 +6,8 @@
 
 ## RC 镜像下载与验证状态
 
+> 上传状态：配套元数据已提供，但 x86_64 镜像主体仍通过 Edge 上传，尚未确认为可下载的 Release 附件。请在 `.part001` 附件出现并通过校验后使用此路线。
+
 [v0.2.0-rc.1 发布页](https://github.com/edmondcvc/rust-usb-bridge/releases/tag/v0.2.0-rc.1)提供 x86_64 预览镜像。将对应的 `.img.gz.part001`、`.img.gz.volumes.json`、来源和验证 JSON、`SHA256SUMS-images-x86_64-0.2.0-rc.1` 以及 `release-tools.py` 下载到同一目录。本镜像只有一个分卷，请保留 `.part001` 文件名。使用以下命令合并并校验：
 
 ```powershell

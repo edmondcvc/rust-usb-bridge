@@ -2,6 +2,9 @@
 <p><a href="../zh-CN/images.html">中文</a> · <a href="support.html">Support status</a></p>
 <p>Images are constructed from checksummed official Ubuntu bases, never from a deployed computer. They include this project's service, OpenSSH and required OS dependencies. VirtualHere, VPN login identities and other workstation applications are not included.</p>
 <h2 id="rc-image-download-and-validation">RC image download and validation</h2>
+<blockquote>
+<p>Upload status: companion metadata is available, but the x86_64 image volume is still uploading through Edge and is not yet confirmed as a downloadable release asset. Use this route only after the <code>.part001</code> asset appears and verifies.</p>
+</blockquote>
 <p>The <a href="https://github.com/edmondcvc/rust-usb-bridge/releases/tag/v0.2.0-rc.1">v0.2.0-rc.1 release</a> provides an x86_64 image preview. Download its <code>.img.gz.part001</code>, <code>.img.gz.volumes.json</code>, provenance and validation JSON, <code>SHA256SUMS-images-x86_64-0.2.0-rc.1</code>, and <code>release-tools.py</code> into one directory. This image fits in one volume; retain the <code>.part001</code> name. Merge and verify it with:</p>
 <pre><code class="language-powershell">py release-tools.py merge --file .\RustUSBBridge-Ubuntu24.04-0.2.0-rc.1-x86_64.img.gz.volumes.json --output .\merged
 </code></pre>

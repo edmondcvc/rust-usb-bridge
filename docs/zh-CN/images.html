@@ -2,6 +2,9 @@
 <p><a href="../en/images.html">English</a> · <a href="support.html">支持状态</a></p>
 <p>镜像从经过校验的 Ubuntu 官方基础镜像构建，不从已部署电脑克隆。内容包含本项目服务、OpenSSH 和必要系统依赖，不包含 VirtualHere、他人 VPN 登录身份或原工作站应用。</p>
 <h2 id="rc">RC 镜像下载与验证状态</h2>
+<blockquote>
+<p>上传状态：配套元数据已提供，但 x86_64 镜像主体仍通过 Edge 上传，尚未确认为可下载的 Release 附件。请在 <code>.part001</code> 附件出现并通过校验后使用此路线。</p>
+</blockquote>
 <p><a href="https://github.com/edmondcvc/rust-usb-bridge/releases/tag/v0.2.0-rc.1">v0.2.0-rc.1 发布页</a>提供 x86_64 预览镜像。将对应的 <code>.img.gz.part001</code>、<code>.img.gz.volumes.json</code>、来源和验证 JSON、<code>SHA256SUMS-images-x86_64-0.2.0-rc.1</code> 以及 <code>release-tools.py</code> 下载到同一目录。本镜像只有一个分卷，请保留 <code>.part001</code> 文件名。使用以下命令合并并校验：</p>
 <pre><code class="language-powershell">py release-tools.py merge --file .\RustUSBBridge-Ubuntu24.04-0.2.0-rc.1-x86_64.img.gz.volumes.json --output .\merged
 </code></pre>

@@ -6,6 +6,8 @@ Images are constructed from checksummed official Ubuntu bases, never from a depl
 
 ## RC image download and validation
 
+> Upload status: companion metadata is available, but the x86_64 image volume is still uploading through Edge and is not yet confirmed as a downloadable release asset. Use this route only after the `.part001` asset appears and verifies.
+
 The [v0.2.0-rc.1 release](https://github.com/edmondcvc/rust-usb-bridge/releases/tag/v0.2.0-rc.1) provides an x86_64 image preview. Download its `.img.gz.part001`, `.img.gz.volumes.json`, provenance and validation JSON, `SHA256SUMS-images-x86_64-0.2.0-rc.1`, and `release-tools.py` into one directory. This image fits in one volume; retain the `.part001` name. Merge and verify it with:
 
 ```powershell
