@@ -8,13 +8,13 @@ while (($#)); do
     --base-sha256) hash=${2:?}; shift 2;; --base-url) base_url=${2:?}; shift 2;;
     --binary) binary=${2:?}; shift 2;; --output) output=${2:?}; shift 2;;
     --username) user=${2:?}; shift 2;;
-    -h|--help) echo 'Usage: sudo bash build-image.sh --platform x86_64|uefi-arm64|raspi4|raspi5 --base OFFICIAL_IMAGE --base-sha256 HASH --base-url HTTPS_URL --binary ELF --output NEW_DIRECTORY [--username operator]'; exit 0;;
+    -h|--help) echo 'Usage: bash build-image.sh --platform x86_64|uefi-arm64|raspi4|raspi5 --base OFFICIAL_IMAGE --base-sha256 HASH --base-url HTTPS_URL --binary ELF --output NEW_DIRECTORY [--username operator]'; exit 0;;
     *) echo "Unknown argument: $1" >&2; exit 2;;
   esac
 done
 case $platform in x86_64) arch=x86_64;; uefi-arm64|raspi4|raspi5) arch=aarch64;; *) echo 'Select an explicit boot platform.' >&2; exit 2;; esac
 [[ $(uname -m) == "$arch" ]] || { echo 'Run on a matching-architecture Linux builder with libguestfs (a VM is sufficient for construction, not physical acceptance).' >&2; exit 1; }
-[[ $EUID == 0 && -f $base && -f $binary && -n $output && ! -e $output ]] || { echo 'Use sudo, existing inputs and a new output directory.' >&2; exit 1; }
+[[ -f $base && -f $binary && -n $output && ! -e $output ]] || { echo 'Use readable inputs and a new, writable output directory.' >&2; exit 1; }
 [[ $user =~ ^[a-z_][a-z0-9_-]*$ && $hash =~ ^[a-fA-F0-9]{64}$ ]] || exit 2
 case $base_url in https://cloud-images.ubuntu.com/*|https://cdimage.ubuntu.com/*) ;; *) echo 'Only explicitly identified official Ubuntu base images are accepted.' >&2; exit 2;; esac
 case $platform in raspi*) [[ $base_url == *raspi* ]] || { echo 'Use the Ubuntu ARM64 Raspberry Pi image.' >&2; exit 2; };; *) [[ $base_url != *raspi* ]] || { echo 'Pi boot images are not generic UEFI images.' >&2; exit 2; };; esac

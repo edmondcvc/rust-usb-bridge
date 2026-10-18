@@ -53,7 +53,7 @@ jobs:
           LIBGUESTFS_BACKEND: direct
         run: |
           BASE=base.img; if [ -f base.img.xz ]; then BASE=base.img.xz; fi
-          sudo -E bash scripts/images/build-image.sh --platform "$PLATFORM" --base "$BASE" --base-sha256 "$BASE_SHA256" --base-url "$BASE_URL" --binary unpacked/usb-bridge-server --output image-output
+          bash scripts/images/build-image.sh --platform "$PLATFORM" --base "$BASE" --base-sha256 "$BASE_SHA256" --base-url "$BASE_URL" --binary unpacked/usb-bridge-server --output image-output
           sudo chown -R "$(id -u):$(id -g)" image-output
           python3 scripts/release.py split --file image-output/*.img.gz --output image-output
       - uses: actions/upload-artifact@v4
@@ -63,3 +63,4 @@ jobs:
             image-output/*.part*
             image-output/*.json
             image-output/SHA256SUMS
+

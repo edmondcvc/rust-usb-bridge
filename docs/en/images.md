@@ -21,7 +21,7 @@ Use a Linux builder of the **same CPU architecture** as the image with enough di
 
 ```bash
 sudo apt install libguestfs-tools qemu-utils xz-utils python3
-sudo bash scripts/images/build-image.sh \
+bash scripts/images/build-image.sh \
   --platform x86_64 \
   --base /work/noble-server-cloudimg-amd64.img \
   --base-url https://cloud-images.ubuntu.com/noble/current/noble-server-cloudimg-amd64.img \
@@ -31,6 +31,8 @@ sudo bash scripts/images/build-image.sh \
 ```
 
 ARM UEFI uses the arm64 base and `--platform uefi-arm64`. Pi uses an official `...arm64+raspi.img.xz` and `--platform raspi4` or `raspi5`. Never substitute a private machine snapshot. The build refuses incorrect architecture, wrong base checksum, reused output directories and missing USB/IP modules. It records base URL/hash, final image hash and **pending** hardware acceptance in `image-provenance.json`. The manual GitHub **Build clean Ubuntu image** workflow provides the same recipe with native architecture runners and a successful same-commit CI input.
+
+Run the image builder as your normal account in a user-writable directory. Only dependency installation needs sudo; libguestfs edits the guest filesystem without requiring builder root access.
 
 ## Download, verify and write
 
@@ -55,3 +57,4 @@ df -h /
 ```
 
 Booting in QEMU proves only that virtual configuration. Each physical ARM machine and Pi model still requires boot/network/kernel-module and real-USB validation before stable support.
+

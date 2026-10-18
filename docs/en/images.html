@@ -37,7 +37,7 @@
 <h2 id="build-on-linux">Build on Linux</h2>
 <p>Use a Linux builder of the <strong>same CPU architecture</strong> as the image with enough disk space for the uncompressed input, output and libguestfs appliance. A VM is acceptable for construction. Install <code>libguestfs-tools qemu-utils xz-utils python3</code>, obtain the official image and its official <code>SHA256SUMS</code>, then supply the exact hash. Use the architecture-matched service ELF from the same project release.</p>
 <pre><code class="language-bash">sudo apt install libguestfs-tools qemu-utils xz-utils python3
-sudo bash scripts/images/build-image.sh \
+bash scripts/images/build-image.sh \
   --platform x86_64 \
   --base /work/noble-server-cloudimg-amd64.img \
   --base-url https://cloud-images.ubuntu.com/noble/current/noble-server-cloudimg-amd64.img \
@@ -46,6 +46,7 @@ sudo bash scripts/images/build-image.sh \
   --output /work/new-image-output
 </code></pre>
 <p>ARM UEFI uses the arm64 base and <code>--platform uefi-arm64</code>. Pi uses an official <code>...arm64+raspi.img.xz</code> and <code>--platform raspi4</code> or <code>raspi5</code>. Never substitute a private machine snapshot. The build refuses incorrect architecture, wrong base checksum, reused output directories and missing USB/IP modules. It records base URL/hash, final image hash and <strong>pending</strong> hardware acceptance in <code>image-provenance.json</code>. The manual GitHub <strong>Build clean Ubuntu image</strong> workflow provides the same recipe with native architecture runners and a successful same-commit CI input.</p>
+<p>Run the image builder as your normal account in a user-writable directory. Only dependency installation needs sudo; libguestfs edits the guest filesystem without requiring builder root access.</p>
 <h2 id="download-verify-and-write">Download, verify and write</h2>
 <p>Only use image assets actually present in a release; a recipe is not evidence that a boot image has passed acceptance. All RC images remain hardware-unverified until the matrix is updated. If published as 1-GiB volumes, download every part and the matching <code>.volumes.json</code>; use the release's <code>release-tools.py</code>:</p>
 <pre><code class="language-powershell">py release-tools.py merge --file .\IMAGE.img.gz.volumes.json --output .\merged

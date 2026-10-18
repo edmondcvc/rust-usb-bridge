@@ -21,7 +21,7 @@
 
 ```bash
 sudo apt install libguestfs-tools qemu-utils xz-utils python3
-sudo bash scripts/images/build-image.sh \
+bash scripts/images/build-image.sh \
   --platform x86_64 \
   --base /work/noble-server-cloudimg-amd64.img \
   --base-url https://cloud-images.ubuntu.com/noble/current/noble-server-cloudimg-amd64.img \
@@ -31,6 +31,8 @@ sudo bash scripts/images/build-image.sh \
 ```
 
 通用 ARM 使用 arm64 基础盘和 `--platform uefi-arm64`。树莓派使用官方 `...arm64+raspi.img.xz` 和 `--platform raspi4`／`raspi5`。不允许用私有机器快照代替。程序拒绝架构不符、哈希错误、已存在的输出目录和缺少 USB/IP 内核模块的镜像。`image-provenance.json` 记录来源、基础镜像哈希、最终镜像哈希及 **待验证** 的硬件验收状态。GitHub 的 **Build clean Ubuntu image** 手动工作流在对应架构 runner 上使用同一流程，要求输入同一提交成功的 CI 编号。
+
+镜像构建程序使用普通账户运行，输入与输出目录应由该账户读写。只有安装依赖需要 sudo；libguestfs 可以修改镜像内的文件，不需要构建机 root 权限。
 
 ## 下载、校验与写盘
 
@@ -55,3 +57,4 @@ df -h /
 ```
 
 QEMU 启动通过只证明对应虚拟配置。每种实体 ARM 电脑和 Pi 型号仍需完成启动、网络、内核模块和真实 USB 验证后，才能宣布正式支持。
+
