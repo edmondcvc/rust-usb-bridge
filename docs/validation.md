@@ -13,11 +13,21 @@ Recorded on 2026-10-18. These checks qualify an RC; they do not establish physic
 | Release tools / 发布工具 | 4 passed / 通过 | Tar executable modes, architecture rejection, corrupt volumes, unsafe volume paths |
 | Bilingual docs / 双语文档 | Passed / 通过 | 24 Markdown files; eight corresponding pages per language; local links and HTML rendering |
 | Source audit / 源码审计 | Passed / 通过 | Tracked files checked for private state, machine literals and forbidden artifacts |
-| CI definition / CI 定义 | Passed static checks / 静态检查通过 | Actionlint and PowerShell parsing; hosted Actions execution remains pending |
-| Windows installer payload / Windows 安装器内载荷 | Passed / 通过 | 907 files verified against package SHA256; no install into the existing production installation |
-| Linux x86_64 and ARM64 binaries / 双架构 Linux 二进制 | Built / 已编译 | Static musl ELF built; ARM64 execution pending |
+| Hosted CI / GitHub 持续构建 | Passed / 通过 | Source/docs, native Linux x86_64 and ARM64 tests/builds, Windows tests/build/setup payload verification |
+| Windows installer payload / Windows 安装器内载荷 | Passed / 通过 | 909 files verified against package SHA256; no install into the existing production installation |
+| Linux x86_64 and ARM64 binaries / 双架构 Linux 二进制 | Built and tested / 已编译与测试 | Static musl ELF; native architecture CI executes server/common tests |
+| Published online/offline installation / 公开在线与离线安装 | Passed in VM / 虚拟机通过 | Ubuntu 24.04 kernel 6.8.0-147-generic; repeat install, complete/incomplete backup guards, uninstall/reinstall and retained configuration/CA |
+| Image identity initialization / 镜像身份初始化 | Passed / 通过 | Actual Linux executable; two independent CAs and repeat-start identity retention; host/USB operations stubbed |
 | Boot images / 启动镜像 | Pending / 待验证 | Recipes and workflows supplied; a successful recipe syntax check is not a boot test |
 | Physical USB matrix / 真实 USB 矩阵 | Pending / 待验收 | x86_64, generic UEFI ARM64, Raspberry Pi 4 and Pi 5; dual Windows device ownership and recovery |
+
+Published RC source `5e183c74e9b834655182a71c55a1173c79295222` passed [hosted CI](https://github.com/edmondcvc/rust-usb-bridge/actions/runs/39121730091). Subsequent image-build fixes at `26fdb64c2fc45919aafb322fd781fa1b94ba497e` passed [all four CI jobs](https://github.com/edmondcvc/rust-usb-bridge/actions/runs/39130619379). The published RC tag and its existing release assets remain pinned to the original release source.
+
+公开 RC 源码 `5e183c74e9b834655182a71c55a1173c79295222` 已通过上述 RC 持续构建；后续镜像修正提交 `26fdb64c2fc45919aafb322fd781fa1b94ba497e` 的四个 CI 任务也全部通过。已发布 RC 的标签和已有附件仍固定在原始发布源码。实际安装维护验证步骤与边界见 [中文记录](zh-CN/support.md)／[English record](en/support.md)。
+
+The Raspberry Pi 4 artifact from [image run 39128753131](https://github.com/edmondcvc/rust-usb-bridge/actions/runs/39128753131) was downloaded and checked: ZIP SHA256 `e4a00c65fc93300c8980e2053c506105f9c01dd7dc5fa90da7320aa4e1efe54a`; both volumes and merged compressed image passed checksums (`d39936cbd5eb99c8e906e8f0b72af7d827caf794e0c2286e5e5c74d6dfb36246`). Read-only filesystem inspection confirmed an empty machine ID, absent SSH host/login keys, empty private service state, locked administrator password, matching tested startup scripts and USB/IP modules in kernel `6.8.0-1064-raspi`. This is not a board boot test.
+
+树莓派 4 构建附件已实际下载，ZIP 哈希、两份分卷及合并后的镜像哈希均通过校验（哈希见上段）。只读文件系统检查确认机器 ID 为空、没有 SSH 主机与登录密钥、私有服务状态为空、管理员密码锁定、启动脚本与已测试源码一致，且内核 `6.8.0-1064-raspi` 包含 USB/IP 模块。这些检查不能替代板卡启动和真实 USB 验收。
 
 The existing native HWND tray restoration is retained. The RC UI was opened in an isolated demo for tutorial screenshots; the current RC installer has not replaced the user's working installation. Actual click, driver restart and end-to-end device checks remain explicit release gates.
 
