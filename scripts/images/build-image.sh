@@ -38,7 +38,13 @@ qemu-img convert -f "$format" -O raw "$input" "$image"
 cat > "$work/provision.sh" <<EOF
 #!/bin/bash
 set -Eeuo pipefail
-getent passwd '$user' >/dev/null || useradd -m -s /bin/bash -G sudo '$user'
+if ! getent passwd '$user' >/dev/null; then
+  if getent group '$user' >/dev/null; then
+    useradd -m -s /bin/bash -g '$user' -G sudo '$user'
+  else
+    useradd -m -s /bin/bash -G sudo '$user'
+  fi
+fi
 passwd -l '$user'
 if [[ '$user' != ubuntu ]] && getent passwd ubuntu >/dev/null; then passwd -l ubuntu; fi
 echo '$user' > /etc/rust-usb-image-user
@@ -145,3 +151,4 @@ with image.open('rb') as f:
 (out/'image-provenance.json').write_text(json.dumps(dict(platform=sys.argv[2],base_url=sys.argv[3],base_sha256=sys.argv[4],image_sha256=h.hexdigest(),physical_boot_acceptance='pending',physical_usb_acceptance='pending'),indent=2)+'\n')
 PY
 echo "Built $image.gz; boot and real-USB validation are still required."
+
