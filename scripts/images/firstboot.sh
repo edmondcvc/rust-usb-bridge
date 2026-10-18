@@ -12,7 +12,7 @@ ssh-keygen -A
 modprobe usbip-core
 modprobe usbip-host
 if [[ ! -e $state/config.json ]]; then
-  /opt/rust-usb-bridge/usb-bridge-server init --state-dir "$state" --server-name usb-bridge --server-name "usb-bridge-$suffix"
+  /opt/rust-usb-bridge/usb-bridge-server init --state-dir "$state" --server-name "usb-bridge-$suffix"
 fi
 install -d -m 0755 /opt/rust-usb-bridge/public
 install -m 0644 "$state/ca.pem" /opt/rust-usb-bridge/public/ca.pem

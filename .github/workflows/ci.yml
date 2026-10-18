@@ -42,6 +42,7 @@ jobs:
           export CARGO_TARGET_$(echo '${{ matrix.target }}' | tr '[:lower:]-' '[:upper:]_')_LINKER=musl-gcc
           cargo test --release --locked --target ${{ matrix.target }} -p bridge-server -p bridge-common
           cargo build --release --locked --target ${{ matrix.target }} -p bridge-server
+          sudo python3 tests/image_firstboot_test.py target/${{ matrix.target }}/release/usb-bridge-server
       - run: python3 -m pip install -r docs/requirements.txt && python3 scripts/check-docs.py --render
       - run: python3 scripts/release.py linux --binary target/${{ matrix.target }}/release/usb-bridge-server --arch ${{ matrix.arch }}
       - uses: actions/upload-artifact@v4
