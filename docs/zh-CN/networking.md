@@ -3,11 +3,11 @@
 [English](../en/networking.md)
 先验证局域网再配置异地网络。主机地址是 Windows 能到达的 Linux 地址；SSH 与 USB TLS 服务使用不同端口。
 
-| Route | Host entered in Windows | SSH | USB TLS |
+| 连接方式 | Windows 中填写的主机地址 | SSH 端口 | USB TLS 端口 |
 |---|---|---|---|
-| LAN | Linux LAN IP/DNS | 22 | 3241 |
-| Tailscale / VPN | Linux private VPN IP/DNS | 22 | 3241 |
-| Public relay | Your relay IP/DNS | 12222 (example) | 13241 (example) |
+| 局域网 | Linux 局域网 IP／域名 | 22 | 3241 |
+| Tailscale／VPN | Linux 的 VPN 内网 IP／域名 | 22 | 3241 |
+| 公网中转 | 自有中转服务器 IP／域名 | 12222（示例） | 13241（示例） |
 
 ```powershell
 Test-NetConnection YOUR_LINUX_ADDRESS -Port 22

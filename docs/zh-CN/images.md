@@ -46,6 +46,8 @@ export SUPERMIN_MODULES="/lib/modules/$(uname -r)"
 
 换一个新输出目录后重试。其他启动失败可设置 `LIBGUESTFS_DEBUG=1 LIBGUESTFS_TRACE=1`，记录具体原因。
 
+Ubuntu 24.04 的 `passt` 软件包可能以 `Permission denied` 拒绝创建 libguestfs PID 文件。一次性 CI 构建机移除此可选辅助程序，使用 libguestfs 的 QEMU 用户态网络后备方式。本地构建请在独立虚拟机中采用此办法，或使用已修复该辅助程序的系统；共享主机移除软件包前应检查依赖变化。工作流仅向当前构建用户授予存在的 `/dev/kvm` 访问权限；硬件加速不是必需条件，但比 TCG 模拟快得多。
+
 ## 下载、校验与写盘
 
 只使用 Release 中实际提供的镜像附件；有构建脚本不等于镜像已经验收。RC 镜像在更新验收矩阵前均标为硬件待验证。若按 1 GiB 分卷发布，下载所有分卷及 `.volumes.json`，运行随 Release 提供的 `release-tools.py`：

@@ -46,6 +46,8 @@ export SUPERMIN_MODULES="/lib/modules/$(uname -r)"
 
 Retry with a new output directory. For other appliance startup failures, set `LIBGUESTFS_DEBUG=1 LIBGUESTFS_TRACE=1` to capture the underlying error.
 
+Ubuntu 24.04's `passt` package can reject libguestfs PID files with `Permission denied`. The disposable CI builder removes that optional helper to select libguestfs's QEMU user-networking fallback. For local construction, use a dedicated builder VM with this workaround or a distribution with the corrected helper; inspect dependency changes before removing packages on a shared host. The workflow grants only its build user access to `/dev/kvm` when present. Hardware acceleration is optional but substantially faster than TCG emulation.
+
 ## Download, verify and write
 
 Only use image assets actually present in a release; a recipe is not evidence that a boot image has passed acceptance. All RC images remain hardware-unverified until the matrix is updated. If published as 1-GiB volumes, download every part and the matching `.volumes.json`; use the release's `release-tools.py`:

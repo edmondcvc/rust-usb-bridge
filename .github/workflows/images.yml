@@ -44,7 +44,11 @@ jobs:
           curl --fail --location --proto '=https' "$BASE_URL" -o base.img
           if [[ "$BASE_URL" == *.xz ]]; then mv base.img base.img.xz; fi
           sudo apt-get update
-          sudo apt-get install -y libguestfs-tools qemu-utils xz-utils
+          sudo apt-get install -y libguestfs-tools qemu-utils xz-utils acl
+          # Noble's passt profile rejects guestfs PID files. Use libguestfs's
+          # built-in QEMU user networking fallback on this disposable builder.
+          sudo apt-get remove -y passt
+          if [ -e /dev/kvm ]; then sudo setfacl -m "u:$(id -u):rw" /dev/kvm; fi
           # Ubuntu restricts /boot/vmlinuz to root. Give supermin its own readable
           # copy of the public kernel without changing the host's file modes.
           sudo install -m 0644 "/boot/vmlinuz-$(uname -r)" "$RUNNER_TEMP/guestfs-kernel"
