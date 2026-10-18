@@ -86,8 +86,9 @@ jobs:
           cargo build --release --locked -p bridge-setup
           if ($LASTEXITCODE) { throw 'Setup build failed' }
           Copy-Item target/release/bridge-setup.exe dist/RustUSBBridge-Setup-0.2.0-rc.1-x64.exe
-          $p=Start-Process dist/RustUSBBridge-Setup-0.2.0-rc.1-x64.exe -ArgumentList '--check-payload --output payload-check.json' -PassThru
-          $p.WaitForExit()
+          $report=Join-Path $PWD 'payload-check.json'
+          $p=Start-Process dist/RustUSBBridge-Setup-0.2.0-rc.1-x64.exe -ArgumentList @('--check-payload','--output',('"'+$report+'"')) -WindowStyle Hidden -PassThru
+          if (-not $p.WaitForExit(120000)) { $p.Kill(); throw 'Payload check timed out' }
           if ($p.ExitCode -ne 0) { throw 'Payload check failed' }
           python scripts/../tests/check-windows-runtime.py target/release/bridge-client.exe dist/RustUSBBridge-Setup-0.2.0-rc.1-x64.exe
       - uses: actions/upload-artifact@v4

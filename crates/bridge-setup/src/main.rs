@@ -280,14 +280,7 @@ fn run() -> Result<()> {
             .find(|a| a[0] == "--output")
             .map(|a| PathBuf::from(&a[1]))
             .context("校验安装包需要 --output C:\\路径\\check.json")?;
-        if !output.is_absolute()
-            || !output
-                .to_string_lossy()
-                .to_ascii_lowercase()
-                .starts_with("c:\\")
-        {
-            bail!("校验报告仅支持 C: 绝对路径");
-        }
+        if !output.is_absolute() { bail!("校验报告需要绝对路径"); }
         fs::write(output, serde_json::to_vec_pretty(&report)?)?;
         return Ok(());
     }
@@ -303,7 +296,7 @@ fn run() -> Result<()> {
     {
         use windows_sys::Win32::UI::{Shell::ShellExecuteW, WindowsAndMessaging::SW_SHOWNORMAL};
         if !elevated()? {
-            if !message("安装 USB 网络共享 Rust 免费版？\n\n将安装客户端和官方已签名 USB/IP 驱动。需要管理员授权，USB 设备可能短暂重新连接，完成后可能需要重启。请先结束加工、文件传输、视频或音频任务。\n\n原 CorelLASER 图标与加工配置会保留。", true) { return Ok(()); }
+            if !message("安装 USB 网络共享 Rust 免费版？\n\n将安装客户端和官方已签名 USB/IP 驱动。需要管理员授权，USB 设备可能短暂重新连接，完成后可能需要重启。请先结束加工、文件传输、视频或音频任务。\n\n已有软件和本软件的配对配置会保留。", true) { return Ok(()); }
             let exe = std::env::current_exe()?;
             let result = unsafe {
                 ShellExecuteW(
@@ -373,7 +366,11 @@ fn run() -> Result<()> {
 
 fn main() {
     if let Err(error) = run() {
-        message(&format!("{error:#}"), false);
+        if std::env::args().any(|arg| arg == "--check-payload") {
+            eprintln!("{error:#}");
+        } else {
+            message(&format!("{error:#}"), false);
+        }
         std::process::exit(1);
     }
 }
@@ -440,3 +437,4 @@ mod tests {
         assert!(check_payload(&package_fixture(false, true)).is_err());
     }
 }
+
