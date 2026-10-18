@@ -64,8 +64,8 @@ jobs:
           merge-multiple: true
           path: .tools/server-packages
       - run: rustup show
-      - name: Unit tests (interactive tray callback tested separately on a desktop)
-        run: cargo test --release --locked --workspace -- --skip gui::tray_tests::tray_restore_wakes_hidden_window_without_an_egui_frame
+      - name: Unit tests (desktop tray and non-admin ACL acceptance tested locally)
+        run: cargo test --release --locked --workspace -- --skip gui::tray_tests::tray_restore_wakes_hidden_window_without_an_egui_frame --skip security::pipe_tests::ordinary_user_can_connect_but_cannot_create_additional_instance
       - run: cargo build --release --locked -p bridge-client
       - run: python -m pip install -r docs/requirements.txt; python scripts/check-docs.py --render
       - name: Fetch unchanged signed vendor driver
@@ -97,3 +97,4 @@ jobs:
             dist/*.exe
             dist/*.zip
             payload-check.json
+
