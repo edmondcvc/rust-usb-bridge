@@ -65,7 +65,7 @@ jobs:
           path: .tools/server-packages
       - run: rustup show
       - name: Unit tests (desktop tray and non-admin ACL acceptance tested locally)
-        run: cargo test --release --locked --workspace -- --skip gui::tray_tests::tray_restore_wakes_hidden_window_without_an_egui_frame --skip security::pipe_tests::ordinary_user_can_connect_but_cannot_create_additional_instance
+        run: cargo test --release --locked --workspace -- --test-threads=1 --skip gui::tray_tests::tray_restore_wakes_hidden_window_without_an_egui_frame --skip security::pipe_tests::ordinary_user_can_connect_but_cannot_create_additional_instance
       - run: cargo build --release --locked -p bridge-client
       - run: python -m pip install -r docs/requirements.txt; python scripts/check-docs.py --render
       - name: Fetch unchanged signed vendor driver

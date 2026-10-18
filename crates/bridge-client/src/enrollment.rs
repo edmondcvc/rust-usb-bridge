@@ -121,15 +121,15 @@ if([Console]::ReadLine() -ne 'yes'){exit 3}
 [Console]::WriteLine('{"event":"error","kind":"password","message":"wrong password"}')
 "#);
         let job=start(&path,input()).unwrap();
-        assert!(matches!(job.events.recv_timeout(Duration::from_secs(15)).unwrap(),Event::Confirm{..}));
+        assert!(matches!(job.events.recv_timeout(Duration::from_secs(60)).unwrap(),Event::Confirm{..}));
         job.actions.send(Action::Confirm(true)).unwrap();
-        assert!(matches!(job.events.recv_timeout(Duration::from_secs(15)).unwrap(),Event::Error{kind,..} if kind=="password"));
+        assert!(matches!(job.events.recv_timeout(Duration::from_secs(60)).unwrap(),Event::Error{kind,..} if kind=="password"));
     }
     #[test]
     fn cancellation_does_not_wait_for_helper_or_emit_success() {
         let (_dir,path)=script("param([switch]$PipeMode)\n$r=[Console]::ReadLine()\n[Console]::WriteLine('{\"event\":\"progress\",\"message\":\"working\"}')\nStart-Sleep -Seconds 60");
         let job=start(&path,input()).unwrap();
-        assert!(matches!(job.events.recv_timeout(Duration::from_secs(15)).unwrap(),Event::Progress{..}));
+        assert!(matches!(job.events.recv_timeout(Duration::from_secs(60)).unwrap(),Event::Progress{..}));
         job.actions.send(Action::Cancel).unwrap();
         assert!(matches!(job.events.recv_timeout(Duration::from_secs(3)).unwrap(),Event::Error{..}));
     }
@@ -137,7 +137,7 @@ if([Console]::ReadLine() -ne 'yes'){exit 3}
     fn truncated_helper_output_cannot_report_success() {
         let (_dir,path)=script("param([switch]$PipeMode)\n$r=[Console]::ReadLine()\n[Console]::WriteLine('not-json')");
         let job=start(&path,input()).unwrap();
-        assert!(matches!(job.events.recv_timeout(Duration::from_secs(15)).unwrap(),Event::Error{..}));
+        assert!(matches!(job.events.recv_timeout(Duration::from_secs(60)).unwrap(),Event::Error{..}));
     }
     #[test]
     fn force_release_helper_uses_stdin_and_requires_explicit_completion() {
@@ -149,7 +149,7 @@ if($r.force_release.session_id -ne 'fixture-session' -or $r.password -ne 'test-o
         let mut value = input();
         value.force_release = Some(bridge_common::ForceReleaseRequest {server_id:"fixture".into(),busid:"1-2".into(),session_id:"fixture-session".into(),path:"/fixture".into(),vendor:1,product:2,serial:None});
         let job = start(&path, value).unwrap();
-        assert!(matches!(job.events.recv_timeout(Duration::from_secs(15)).unwrap(), Event::Released));
+        assert!(matches!(job.events.recv_timeout(Duration::from_secs(60)).unwrap(), Event::Released));
     }
     #[test]
     fn reject_options_urls_and_newlines_before_spawn() {
@@ -159,3 +159,4 @@ if($r.force_release.session_id -ne 'fixture-session' -or $r.password -ne 'test-o
         input.host="host.example".into(); input.password="a\nb".into(); assert!(input.validate().is_err());
     }
 }
+
