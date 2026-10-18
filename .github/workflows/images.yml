@@ -45,12 +45,20 @@ jobs:
           if [[ "$BASE_URL" == *.xz ]]; then mv base.img base.img.xz; fi
           sudo apt-get update
           sudo apt-get install -y libguestfs-tools qemu-utils xz-utils
+          # Ubuntu restricts /boot/vmlinuz to root. Give supermin its own readable
+          # copy of the public kernel without changing the host's file modes.
+          sudo install -m 0644 "/boot/vmlinuz-$(uname -r)" "$RUNNER_TEMP/guestfs-kernel"
+          echo "SUPERMIN_KERNEL=$RUNNER_TEMP/guestfs-kernel" >> "$GITHUB_ENV"
+          echo "SUPERMIN_KERNEL_VERSION=$(uname -r)" >> "$GITHUB_ENV"
+          echo "SUPERMIN_MODULES=/lib/modules/$(uname -r)" >> "$GITHUB_ENV"
       - name: Build clean image (not hardware qualification)
         env:
           BASE_URL: ${{ inputs.base_url }}
           BASE_SHA256: ${{ inputs.base_sha256 }}
           PLATFORM: ${{ inputs.platform }}
           LIBGUESTFS_BACKEND: direct
+          LIBGUESTFS_DEBUG: '1'
+          LIBGUESTFS_TRACE: '1'
         run: |
           BASE=base.img; if [ -f base.img.xz ]; then BASE=base.img.xz; fi
           bash scripts/images/build-image.sh --platform "$PLATFORM" --base "$BASE" --base-sha256 "$BASE_SHA256" --base-url "$BASE_URL" --binary unpacked/usb-bridge-server --output image-output

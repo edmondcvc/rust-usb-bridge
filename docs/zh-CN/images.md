@@ -34,6 +34,18 @@ bash scripts/images/build-image.sh \
 
 镜像构建程序使用普通账户运行，输入与输出目录应由该账户读写。只有安装依赖需要 sudo；libguestfs 可以修改镜像内的文件，不需要构建机 root 权限。
 
+Ubuntu 的 `/boot/vmlinuz-*` 可能只有 root 可读，导致 supermin 启动失败。将公开内核复制到可写的工作目录，并指定对应模块（参见 [libguestfs 官方 FAQ](https://www.libguestfs.org/guestfs-faq.1.html)）：
+
+```bash
+mkdir -p "$PWD/guestfs-work"
+sudo install -m 0644 "/boot/vmlinuz-$(uname -r)" "$PWD/guestfs-work/kernel"
+export SUPERMIN_KERNEL="$PWD/guestfs-work/kernel"
+export SUPERMIN_KERNEL_VERSION="$(uname -r)"
+export SUPERMIN_MODULES="/lib/modules/$(uname -r)"
+```
+
+换一个新输出目录后重试。其他启动失败可设置 `LIBGUESTFS_DEBUG=1 LIBGUESTFS_TRACE=1`，记录具体原因。
+
 ## 下载、校验与写盘
 
 只使用 Release 中实际提供的镜像附件；有构建脚本不等于镜像已经验收。RC 镜像在更新验收矩阵前均标为硬件待验证。若按 1 GiB 分卷发布，下载所有分卷及 `.volumes.json`，运行随 Release 提供的 `release-tools.py`：

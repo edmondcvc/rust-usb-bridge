@@ -34,6 +34,18 @@ ARM UEFI uses the arm64 base and `--platform uefi-arm64`. Pi uses an official `.
 
 Run the image builder as your normal account in a user-writable directory. Only dependency installation needs sudo; libguestfs edits the guest filesystem without requiring builder root access.
 
+On Ubuntu, supermin can fail when `/boot/vmlinuz-*` is readable only by root. Copy the public kernel into a user-writable working directory and identify its matching modules (see the [libguestfs FAQ](https://www.libguestfs.org/guestfs-faq.1.html)):
+
+```bash
+mkdir -p "$PWD/guestfs-work"
+sudo install -m 0644 "/boot/vmlinuz-$(uname -r)" "$PWD/guestfs-work/kernel"
+export SUPERMIN_KERNEL="$PWD/guestfs-work/kernel"
+export SUPERMIN_KERNEL_VERSION="$(uname -r)"
+export SUPERMIN_MODULES="/lib/modules/$(uname -r)"
+```
+
+Retry with a new output directory. For other appliance startup failures, set `LIBGUESTFS_DEBUG=1 LIBGUESTFS_TRACE=1` to capture the underlying error.
+
 ## Download, verify and write
 
 Only use image assets actually present in a release; a recipe is not evidence that a boot image has passed acceptance. All RC images remain hardware-unverified until the matrix is updated. If published as 1-GiB volumes, download every part and the matching `.volumes.json`; use the release's `release-tools.py`:
