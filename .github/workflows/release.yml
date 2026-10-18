@@ -1,0 +1,42 @@
+name: Publish verified prerelease
+on:
+  workflow_dispatch:
+    inputs:
+      run_id:
+        description: Successful Build and verify run ID for the same commit
+        required: true
+        type: string
+permissions:
+  contents: write
+  actions: read
+jobs:
+  prerelease:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Require successful same-commit CI
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RUN_ID: ${{ inputs.run_id }}
+        run: |
+          gh run view "$RUN_ID" --json conclusion,headSha,workflowName > run.json
+          python3 -c 'import json,os; r=json.load(open("run.json")); assert r["conclusion"]=="success" and r["headSha"]==os.environ["GITHUB_SHA"] and r["workflowName"]=="Build and verify"'
+          gh run download "$RUN_ID" -D downloaded
+      - name: Collect audited release assets
+        run: |
+          mkdir dist
+          find downloaded -type f \( -name '*.tar.gz' -o -name '*.zip' -o -name '*.exe' \) -exec cp {} dist/ \;
+          cp scripts/install.sh dist/install.sh
+          cp scripts/release.py dist/release-tools.py
+          python3 scripts/release.py source --output dist
+          python3 scripts/release.py checksums --output dist
+          python3 scripts/audit-public.py
+          test -f dist/RustUSBBridge-Linux-0.2.0-rc.1-x86_64.tar.gz
+          test -f dist/RustUSBBridge-Linux-0.2.0-rc.1-aarch64.tar.gz
+          test -f dist/RustUSBBridge-Setup-0.2.0-rc.1-x64.exe
+      - name: Publish RC only
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release create v0.2.0-rc.1 dist/* --target "$GITHUB_SHA" --prerelease --title "Rust USB Bridge 0.2.0-rc.1" --notes-file docs/release-notes.md

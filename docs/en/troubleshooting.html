@@ -1,0 +1,46 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>troubleshooting</title><style>body{font:17px/1.7 system-ui;max-width:1050px;margin:32px auto;padding:0 24px;color:#192b3a}a{color:#185899}pre{padding:16px;background:#f2f6f9;overflow:auto}table{border-collapse:collapse}td,th{border:1px solid #cdd8e0;padding:8px}img{max-width:100%}</style><h1 id="troubleshooting">Troubleshooting</h1>
+<p><a href="../zh-CN/troubleshooting.html">中文</a></p>
+<table>
+<thead>
+<tr>
+<th>Symptom</th>
+<th>Action</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Service will not start</td>
+<td>Check journal, ELF architecture, kernel modules and file permissions</td>
+</tr>
+<tr>
+<td>Host state unknown</td>
+<td>Check power, network, address and SSH/TLS ports; cached data does not prove availability</td>
+</tr>
+<tr>
+<td>Password/permission failure</td>
+<td>Verify password SSH and sudo with that password; different sudo passwords are not supported by the shortcut enrollment</td>
+</tr>
+<tr>
+<td>Host key changed</td>
+<td>Verify address/reinstallation; do not silently erase trust to bypass the check</td>
+</tr>
+<tr>
+<td>Windows driver not ready</td>
+<td>Review installer logs/reboot requirement and repair with setup</td>
+</tr>
+<tr>
+<td>Device owned by another computer</td>
+<td>Ask its operator to release; administrator release must match the selected session</td>
+</tr>
+<tr>
+<td>Missing USB device</td>
+<td>Check cables, power, Linux enumeration and other USB exporters</td>
+</tr>
+<tr>
+<td>Window hidden after close</td>
+<td>Open taskbar overflow and single-click the blue USB icon</td>
+</tr>
+</tbody>
+</table>
+<p>Preserve the exact error; do not erase identities or reinstall the OS as a guess. Redact passwords, private keys, invitations, hostnames and real addresses before posting logs. Include OS/CPU/kernel/application version, device VID/PID, reproduction steps and time.</p>
+<p>Installation logs: Linux <code>/var/log/rust-usb-bridge/</code>, Windows <code>C:\ProgramData\RustUsbBridge\logs</code>. Share failures and offline hosts are different states. Boot disks, mounted storage, maintenance input devices and hubs are protected; do not force them into forwarding.</p></html>

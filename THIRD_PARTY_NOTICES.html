@@ -1,0 +1,35 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>THIRD_PARTY_NOTICES</title><style>body{font:17px/1.7 system-ui;max-width:1050px;margin:32px auto;padding:0 24px;color:#192b3a}a{color:#185899}pre{padding:16px;background:#f2f6f9;overflow:auto}table{border-collapse:collapse}td,th{border:1px solid #cdd8e0;padding:8px}img{max-width:100%}</style><h1 id="third-party-notices">Third-party notices</h1>
+<p>The Rust USB Bridge application is separate from the kernel drivers. The Windows distribution includes an unchanged upstream installer for <strong>usbip-win2 0.9.8.1 x64</strong>. The Linux distribution uses the operating system's <code>usbip-core</code> and <code>usbip-host</code> kernel modules; it does not redistribute a Linux kernel or replace its drivers.</p>
+<ul>
+<li>Upstream project: <a href="https://github.com/vadimgrn/usbip-win2">https://github.com/vadimgrn/usbip-win2</a></li>
+<li>Pinned release: <a href="https://github.com/vadimgrn/usbip-win2/releases/tag/v.0.9.8.1">https://github.com/vadimgrn/usbip-win2/releases/tag/v.0.9.8.1</a></li>
+<li>PnP driver version supplied by this release: <code>12.1.30.403</code> (distinct from the product/ABI release <code>0.9.8.1</code>).</li>
+<li>Original installer: <code>USBip-0.9.8.1-x64.exe</code></li>
+<li>SHA-256: <code>38cad6d4432b52d5bb9409d9ad03b72fdffc4ada4cd3a48fbeca1a2752a8518a</code></li>
+<li>Upstream license source: <a href="https://github.com/vadimgrn/usbip-win2/blob/v.0.9.8.1/LICENSE.txt">https://github.com/vadimgrn/usbip-win2/blob/v.0.9.8.1/LICENSE.txt</a></li>
+</ul>
+<p>The upstream installer includes its own license, signed driver package, and Microsoft runtime redistributable. Those files are retained as supplied by their authors. Rust crate dependencies and their versions are recorded in <code>Cargo.lock</code>; unchanged dependency and bundled font license/notice texts are provided in <code>THIRD_PARTY_LICENSES</code>, with version, SPDX declaration, source URL and text-hash metadata in its <code>INDEX.json</code>. The application MIT license and these dependency licenses apply to their respective parts; they are not replaced by the following upstream notice.</p>
+<h2 id="usbip-win2-license">usbip-win2 license</h2>
+<pre><code class="language-text">BSD 2-Clause License
+
+Copyright (c) 2021-2026, Vadym Hrynchyshyn &lt;vadimgrn@gmail.com&gt;
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are met:
+
+1. Redistributions of source code must retain the above copyright notice, this
+   list of conditions and the following disclaimer.
+2. Redistributions in binary form must reproduce the above copyright notice,
+   this list of conditions and the following disclaimer in the documentation
+   and/or other materials provided with the distribution.
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS &quot;AS IS&quot;
+AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+</code></pre></html>

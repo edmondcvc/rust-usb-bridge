@@ -1,0 +1,76 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>validation</title><style>body{font:17px/1.7 system-ui;max-width:1050px;margin:32px auto;padding:0 24px;color:#192b3a}a{color:#185899}pre{padding:16px;background:#f2f6f9;overflow:auto}table{border-collapse:collapse}td,th{border:1px solid #cdd8e0;padding:8px}img{max-width:100%}</style><h1 id="v020-rc1-validation">v0.2.0-rc.1 validation / 验证记录</h1>
+<p>Recorded on 2026-10-18. These checks qualify an RC; they do not establish physical platform support.</p>
+<p>记录日期：2026-10-18。以下检查用于预发布版，不代表所有平台已完成实机验收。</p>
+<table>
+<thead>
+<tr>
+<th>Check / 检查</th>
+<th>Result / 结果</th>
+<th>Scope / 范围</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Windows Rust tests / Windows Rust 测试</td>
+<td>51 passed / 通过</td>
+<td>Client, common library, setup; includes native tray regression test</td>
+</tr>
+<tr>
+<td>Linux server tests / Linux 服务端测试</td>
+<td>23 passed / 通过</td>
+<td>x86_64 Ubuntu 24.04 QEMU VM; includes real TCP/TLS pairing with simulated USB state</td>
+</tr>
+<tr>
+<td>Linux protocol library / Linux 协议库</td>
+<td>4 passed / 通过</td>
+<td>x86_64 VM; compatibility and input validation</td>
+</tr>
+<tr>
+<td>Linux installer fixture / Linux 安装脚本隔离测试</td>
+<td>6 passed / 通过</td>
+<td>Fresh/repeated install, pairing retention, wrong architecture, prerequisites, invalid listener, busy device and missing backup guards; kernel/systemd tools simulated</td>
+</tr>
+<tr>
+<td>Release tools / 发布工具</td>
+<td>4 passed / 通过</td>
+<td>Tar executable modes, architecture rejection, corrupt volumes, unsafe volume paths</td>
+</tr>
+<tr>
+<td>Bilingual docs / 双语文档</td>
+<td>Passed / 通过</td>
+<td>24 Markdown files; eight corresponding pages per language; local links and HTML rendering</td>
+</tr>
+<tr>
+<td>Source audit / 源码审计</td>
+<td>Passed / 通过</td>
+<td>Tracked files checked for private state, machine literals and forbidden artifacts</td>
+</tr>
+<tr>
+<td>CI definition / CI 定义</td>
+<td>Passed static checks / 静态检查通过</td>
+<td>Actionlint and PowerShell parsing; hosted Actions execution remains pending</td>
+</tr>
+<tr>
+<td>Windows installer payload / Windows 安装器内载荷</td>
+<td>Passed / 通过</td>
+<td>907 files verified against package SHA256; no install into the existing production installation</td>
+</tr>
+<tr>
+<td>Linux x86_64 and ARM64 binaries / 双架构 Linux 二进制</td>
+<td>Built / 已编译</td>
+<td>Static musl ELF built; ARM64 execution pending</td>
+</tr>
+<tr>
+<td>Boot images / 启动镜像</td>
+<td>Pending / 待验证</td>
+<td>Recipes and workflows supplied; a successful recipe syntax check is not a boot test</td>
+</tr>
+<tr>
+<td>Physical USB matrix / 真实 USB 矩阵</td>
+<td>Pending / 待验收</td>
+<td>x86_64, generic UEFI ARM64, Raspberry Pi 4 and Pi 5; dual Windows device ownership and recovery</td>
+</tr>
+</tbody>
+</table>
+<p>The existing native HWND tray restoration is retained. The RC UI was opened in an isolated demo for tutorial screenshots; the current RC installer has not replaced the user's working installation. Actual click, driver restart and end-to-end device checks remain explicit release gates.</p>
+<p>保留现有原生 HWND 托盘恢复实现；教程截图来自 RC 的隔离演示。此次未用 RC 安装器覆盖用户正常使用的安装。真实点击、驱动重启和设备端到端检查仍是明确的发布门槛。</p></html>

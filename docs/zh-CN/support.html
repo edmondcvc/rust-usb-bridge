@@ -1,0 +1,56 @@
+<!doctype html><html lang="zh-CN"><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>support</title><style>body{font:17px/1.7 system-ui;max-width:1050px;margin:32px auto;padding:0 24px;color:#192b3a}a{color:#185899}pre{padding:16px;background:#f2f6f9;overflow:auto}table{border-collapse:collapse}td,th{border:1px solid #cdd8e0;padding:8px}img{max-width:100%}</style><h1 id="_1">平台支持与验收</h1>
+<p><a href="../en/support.html">English</a>
+首发为预发布版本。以下“目标”不是“全部已正式验证”。缺少 ARM 实机，因此 ARM 和树莓派正式支持须等待硬件验收。</p>
+<table>
+<thead>
+<tr>
+<th>Target</th>
+<th>OS baseline</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Linux x86_64</td>
+<td>Ubuntu Server 24.04 LTS</td>
+<td>Build / automated checks; public-version physical acceptance pending</td>
+</tr>
+<tr>
+<td>Generic UEFI ARM64</td>
+<td>Ubuntu Server 24.04 LTS ARM64</td>
+<td>Build target; physical boot and USB pending</td>
+</tr>
+<tr>
+<td>Raspberry Pi 4</td>
+<td>Ubuntu Server 24.04 LTS raspi 64-bit</td>
+<td>Image recipe; board acceptance pending</td>
+</tr>
+<tr>
+<td>Raspberry Pi 5</td>
+<td>Ubuntu Server 24.04 LTS raspi 64-bit</td>
+<td>Image recipe; board acceptance pending</td>
+</tr>
+<tr>
+<td>Windows x64</td>
+<td>Windows 10 1903+ / Windows 11</td>
+<td>Installer target; public-version clean-machine acceptance pending</td>
+</tr>
+<tr>
+<td>Debian / other systemd distributions</td>
+<td>Matching USB/IP kernel required</td>
+<td>Compatibility path; not formally qualified</td>
+</tr>
+<tr>
+<td>VM</td>
+<td>Explicit physical USB passthrough required</td>
+<td>Boot/mock tests do not prove physical forwarding</td>
+</tr>
+<tr>
+<td>Containers / WSL</td>
+<td>Host kernel, sysfs, privileges required</td>
+<td>Not a supported production installation route</td>
+</tr>
+</tbody>
+</table>
+<p>正式版门槛：每个平台验证全新安装、配对、真实 USB 数据传输、释放、断网和重启恢复；树莓派 4／5 分别记录。两台 Windows 分别使用不同设备，同设备互斥；断开一台不能影响另一台。安装器校验、模拟 USB、ARM runner 或虚拟机测试不能替代这些实物结果。</p>
+<p>每条验收记录需要版本、源码提交、产物哈希、系统／内核、硬件型号、操作步骤和真实结果。只有全部目标硬件通过才发布 <code>v0.2.0</code>。任何 USB 类型（尤其音视频、加工设备）的兼容性都以对应设备实测为准。</p></html>

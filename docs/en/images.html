@@ -1,0 +1,61 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>images</title><style>body{font:17px/1.7 system-ui;max-width:1050px;margin:32px auto;padding:0 24px;color:#192b3a}a{color:#185899}pre{padding:16px;background:#f2f6f9;overflow:auto}table{border-collapse:collapse}td,th{border:1px solid #cdd8e0;padding:8px}img{max-width:100%}</style><h1 id="clean-preinstalled-images">Clean preinstalled images</h1>
+<p><a href="../zh-CN/images.html">中文</a> · <a href="support.html">Support status</a></p>
+<p>Images are constructed from checksummed official Ubuntu bases, never from a deployed computer. They include this project's service, OpenSSH and required OS dependencies. VirtualHere, VPN login identities and other workstation applications are not included.</p>
+<h2 id="select-the-boot-platform">Select the boot platform</h2>
+<table>
+<thead>
+<tr>
+<th>Platform argument</th>
+<th>Base</th>
+<th>Boot target</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>x86_64</code></td>
+<td>Ubuntu 24.04 amd64 cloud disk</td>
+<td>Generic x86_64; verify firmware boot mode on the actual machine</td>
+</tr>
+<tr>
+<td><code>uefi-arm64</code></td>
+<td>Ubuntu 24.04 arm64 cloud disk</td>
+<td>Generic ARM64 UEFI; board firmware/drivers must support the Ubuntu base</td>
+</tr>
+<tr>
+<td><code>raspi4</code></td>
+<td>Ubuntu 24.04 ARM64 Raspberry Pi preinstalled disk</td>
+<td>Raspberry Pi 4</td>
+</tr>
+<tr>
+<td><code>raspi5</code></td>
+<td>Ubuntu 24.04 ARM64 Raspberry Pi preinstalled disk</td>
+<td>Raspberry Pi 5</td>
+</tr>
+</tbody>
+</table>
+<p>Pi 4 and 5 are separately named and accepted even when the upstream base supports both. Do not write a generic UEFI disk to a Pi and assume it has the required board boot files. Base image catalogs: <a href="https://cloud-images.ubuntu.com/noble/current/">Ubuntu cloud images</a>, <a href="https://cdimage.ubuntu.com/releases/24.04/release/">Ubuntu Pi releases</a>.</p>
+<h2 id="build-on-linux">Build on Linux</h2>
+<p>Use a Linux builder of the <strong>same CPU architecture</strong> as the image with enough disk space for the uncompressed input, output and libguestfs appliance. A VM is acceptable for construction. Install <code>libguestfs-tools qemu-utils xz-utils python3</code>, obtain the official image and its official <code>SHA256SUMS</code>, then supply the exact hash. Use the architecture-matched service ELF from the same project release.</p>
+<pre><code class="language-bash">sudo apt install libguestfs-tools qemu-utils xz-utils python3
+sudo bash scripts/images/build-image.sh \
+  --platform x86_64 \
+  --base /work/noble-server-cloudimg-amd64.img \
+  --base-url https://cloud-images.ubuntu.com/noble/current/noble-server-cloudimg-amd64.img \
+  --base-sha256 YOUR_OFFICIAL_64_HEX_DIGIT_HASH \
+  --binary /work/usb-bridge-server \
+  --output /work/new-image-output
+</code></pre>
+<p>ARM UEFI uses the arm64 base and <code>--platform uefi-arm64</code>. Pi uses an official <code>...arm64+raspi.img.xz</code> and <code>--platform raspi4</code> or <code>raspi5</code>. Never substitute a private machine snapshot. The build refuses incorrect architecture, wrong base checksum, reused output directories and missing USB/IP modules. It records base URL/hash, final image hash and <strong>pending</strong> hardware acceptance in <code>image-provenance.json</code>. The manual GitHub <strong>Build clean Ubuntu image</strong> workflow provides the same recipe with native architecture runners and a successful same-commit CI input.</p>
+<h2 id="download-verify-and-write">Download, verify and write</h2>
+<p>Only use image assets actually present in a release; a recipe is not evidence that a boot image has passed acceptance. All RC images remain hardware-unverified until the matrix is updated. If published as 1-GiB volumes, download every part and the matching <code>.volumes.json</code>; use the release's <code>release-tools.py</code>:</p>
+<pre><code class="language-powershell">py release-tools.py merge --file .\IMAGE.img.gz.volumes.json --output .\merged
+</code></pre>
+<p>The merge checks every part and the complete compressed file and refuses to overwrite an output. Decompress <code>.img.gz</code> with a standard gzip-capable tool, then write the <code>.img</code> using a reputable imaging tool following its official instructions. Confirm the target's model/capacity: this replaces its contents. The image runs from that disk; do not overwrite the Linux system disk currently in use.</p>
+<h2 id="first-boot">First boot</h2>
+<p>Attach a display/keyboard and wired DHCP network. The first boot creates a new machine identity, hostname, SSH host keys and TLS identity; no USB devices are preselected. The local screen asks you to choose a password for <code>operator</code> (or your build's <code>--username</code>). There is <strong>no shared default password</strong>. SSH password login is usable only after you set this password locally. Root SSH password login is disabled. The private image is not intended as an unattended system with a published default credential.</p>
+<p>Find the IP on screen or with <code>ip -brief address</code>. Root filesystem expansion is attempted only for a plain ext4 root partition and is logged; check <code>df -h /</code>, particularly on nonstandard firmware/storage layouts. Wi-Fi credentials are not supplied. Then follow <a href="installation.html">Windows installation</a> and <a href="usage.html">pairing</a>.</p>
+<pre><code class="language-bash">systemctl status rust-usb-firstboot rust-usb-account rust-usb-bridge ssh --no-pager
+sudo journalctl -u rust-usb-firstboot -b --no-pager
+df -h /
+</code></pre>
+<p>Booting in QEMU proves only that virtual configuration. Each physical ARM machine and Pi model still requires boot/network/kernel-module and real-USB validation before stable support.</p></html>

@@ -1,0 +1,38 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>installation</title><style>body{font:17px/1.7 system-ui;max-width:1050px;margin:32px auto;padding:0 24px;color:#192b3a}a{color:#185899}pre{padding:16px;background:#f2f6f9;overflow:auto}table{border-collapse:collapse}td,th{border:1px solid #cdd8e0;padding:8px}img{max-width:100%}</style><h1 id="linux-and-windows-installation">Linux and Windows installation</h1>
+<p><a href="../zh-CN/installation.html">中文</a> · <a href="linux-setup.html">Prepare Linux</a></p>
+<h2 id="online-linux-installation">Online Linux installation</h2>
+<p>Use an explicit release version. The script selects x86_64/aarch64, verifies the downloaded archive checksum, and calls the same installer used offline. Read the downloaded script before running it.</p>
+<pre><code class="language-bash">VERSION=v0.2.0-rc.1
+curl -fL &quot;https://github.com/edmondcvc/rust-usb-bridge/releases/download/$VERSION/install.sh&quot; -o install.sh
+less install.sh
+sudo bash install.sh --version &quot;$VERSION&quot; --listen 0.0.0.0:3241 --server-name usb-bridge
+</code></pre>
+<p>The default listener accepts authenticated TLS on TCP 3241. Restrict access to your LAN/VPN through your normal firewall policy; do not open raw USB/IP port 3240. SSH is TCP 22 unless configured otherwise. No USB devices are shared by a fresh installation.</p>
+<h2 id="offline-installation">Offline installation</h2>
+<p>Download the architecture-matched tarball and release <code>SHA256SUMS</code> on another computer. Transfer both. This software bundle contains the service and scripts, <strong>not all distribution/kernel dependencies</strong>: prepare those using <a href="linux-setup.html">Linux setup</a> while internet is available.</p>
+<pre><code class="language-bash"># Use aarch64 instead of x86_64 on 64-bit ARM.
+sha256sum -c SHA256SUMS --ignore-missing
+mkdir -p linux-package
+tar -xzf RustUSBBridge-Linux-0.2.0-rc.1-x86_64.tar.gz -C linux-package
+cd linux-package
+sha256sum -c SHA256SUMS
+sudo bash scripts/linux/check-host.sh
+sudo bash scripts/linux/install-linux.sh --listen 0.0.0.0:3241 --server-name usb-bridge
+</code></pre>
+<p><code>--binary FILE</code> selects a local service ELF; <code>--no-start</code> installs/enables the service without starting it. The installer checks architecture, prerequisites and existing installation ownership. Existing identities and pairings are kept.</p>
+<h2 id="check-linux">Check Linux</h2>
+<pre><code class="language-bash">systemctl is-active rust-usb-bridge
+sudo systemctl status rust-usb-bridge --no-pager
+sudo journalctl -u rust-usb-bridge -b --no-pager -n 80
+sudo /opt/rust-usb-bridge/usb-bridge-server --version
+</code></pre>
+<p>Success: service is <code>active</code>, version matches the release, and the log has no startup error. For failures see <a href="troubleshooting.html">troubleshooting</a>. Certificates and pairing state live in <code>/var/lib/rust-usb-bridge</code> (private); only the public CA/fingerprint are exposed under <code>/opt/rust-usb-bridge/public</code>.</p>
+<h2 id="windows-x64-installation">Windows x64 installation</h2>
+<ol>
+<li>Download <code>RustUSBBridge-Setup-0.2.0-rc.1-x64.exe</code> and <code>SHA256SUMS</code> from the same release. In PowerShell run <code>Get-FileHash .\RustUSBBridge-Setup-0.2.0-rc.1-x64.exe -Algorithm SHA256</code> and compare the complete value.</li>
+<li>End device operations and release this computer's USB sessions before upgrading. Run setup and approve Windows administrator elevation. The unsigned application may show an unknown publisher; verify its origin and hash. The included upstream USB driver retains its own signature.</li>
+<li>If the driver requires a reboot, save your work and reboot. Setup never forcibly reboots Windows. Install the original device driver/application when needed.</li>
+<li>In Settings → Optional features, make sure <strong>OpenSSH Client</strong> is installed. Confirm in PowerShell: <code>Get-Command ssh.exe, ssh-keyscan.exe, ssh-keygen.exe</code>. On disconnected Windows systems, prepare the matching Microsoft optional-feature installation media beforehand.</li>
+<li>Open <strong>Rust USB 客户端</strong> from the desktop. A new installation asks for your Linux address; it is not tied to a demonstration machine. Continue with <a href="usage.html">pairing and usage</a>.</li>
+</ol>
+<p>Installed files are in <code>C:\Program Files\Rust USB Bridge</code>; service/private state is in <code>C:\ProgramData\RustUsbBridge</code>. Check <code>Get-Service UsbBridgeRust</code> if the UI cannot reach its background service. Current interface labels remain Chinese; this release provides bilingual documentation, not a translated GUI.</p></html>

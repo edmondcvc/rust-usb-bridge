@@ -1,0 +1,16 @@
+[workspace]
+members = ["crates/bridge-common", "crates/bridge-server", "crates/bridge-client", "crates/bridge-setup"]
+default-members = ["crates/bridge-common", "crates/bridge-client"]
+resolver = "2"
+
+[workspace.package]
+version = "0.1.0"
+edition = "2021"
+license = "MIT"
+rust-version = "1.85"
+
+[profile.release]
+lto = "thin"
+codegen-units = 1
+strip = "debuginfo"
+

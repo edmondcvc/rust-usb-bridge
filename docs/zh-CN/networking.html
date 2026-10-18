@@ -1,0 +1,42 @@
+<!doctype html><html lang="zh-CN"><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>networking</title><style>body{font:17px/1.7 system-ui;max-width:1050px;margin:32px auto;padding:0 24px;color:#192b3a}a{color:#185899}pre{padding:16px;background:#f2f6f9;overflow:auto}table{border-collapse:collapse}td,th{border:1px solid #cdd8e0;padding:8px}img{max-width:100%}</style><h1 id="_1">网络与异地连接</h1>
+<p><a href="../en/networking.html">English</a>
+先验证局域网再配置异地网络。主机地址是 Windows 能到达的 Linux 地址；SSH 与 USB TLS 服务使用不同端口。</p>
+<table>
+<thead>
+<tr>
+<th>Route</th>
+<th>Host entered in Windows</th>
+<th>SSH</th>
+<th>USB TLS</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>LAN</td>
+<td>Linux LAN IP/DNS</td>
+<td>22</td>
+<td>3241</td>
+</tr>
+<tr>
+<td>Tailscale / VPN</td>
+<td>Linux private VPN IP/DNS</td>
+<td>22</td>
+<td>3241</td>
+</tr>
+<tr>
+<td>Public relay</td>
+<td>Your relay IP/DNS</td>
+<td>12222 (example)</td>
+<td>13241 (example)</td>
+</tr>
+</tbody>
+</table>
+<pre><code class="language-powershell">Test-NetConnection YOUR_LINUX_ADDRESS -Port 22
+Test-NetConnection YOUR_LINUX_ADDRESS -Port 3241
+</code></pre>
+<pre><code class="language-bash">sudo ss -lntp
+ip -brief address
+</code></pre>
+<p>Tailscale 或其他 VPN 是可选组件，不带入他人的登录状态。两端按各自官方文档加入同一私人网络，先确认互通，再在客户端填写 VPN 地址。</p>
+<p>如已有 frp 中转需求，可运行 <code>scripts/prepare-public-relay.ps1</code> 生成服务器和客户端配置，参数包括 <code>-ServerHost</code>、<code>-OutputDirectory</code>、<code>-PublicSshPort</code>、<code>-PublicUsbPort</code>。使用新建目录；生成的 token 和配置是私密部署文件，不提交 GitHub。按所选 frp 版本的官方文档安装 frps／frpc，只转发 SSH 和 TLS 服务端口，不转发原始 3240。首次及变更后的 SSH 身份仍需核对。</p>
+<p>改监听前释放全部设备，再使用 <code>configure-remote-listener.sh --listen 0.0.0.0:3241 --apply</code>。同一主机换地址用客户端主机设置保存新地址；换成另一主机则按更换主机流程重新核对身份。</p></html>

@@ -1,0 +1,42 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>networking</title><style>body{font:17px/1.7 system-ui;max-width:1050px;margin:32px auto;padding:0 24px;color:#192b3a}a{color:#185899}pre{padding:16px;background:#f2f6f9;overflow:auto}table{border-collapse:collapse}td,th{border:1px solid #cdd8e0;padding:8px}img{max-width:100%}</style><h1 id="networking-and-remote-access">Networking and remote access</h1>
+<p><a href="../zh-CN/networking.html">中文</a>
+Verify the LAN route first. The host address must be reachable from Windows; SSH and the USB TLS service use separate ports.</p>
+<table>
+<thead>
+<tr>
+<th>Route</th>
+<th>Host entered in Windows</th>
+<th>SSH</th>
+<th>USB TLS</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>LAN</td>
+<td>Linux LAN IP/DNS</td>
+<td>22</td>
+<td>3241</td>
+</tr>
+<tr>
+<td>Tailscale / VPN</td>
+<td>Linux private VPN IP/DNS</td>
+<td>22</td>
+<td>3241</td>
+</tr>
+<tr>
+<td>Public relay</td>
+<td>Your relay IP/DNS</td>
+<td>12222 (example)</td>
+<td>13241 (example)</td>
+</tr>
+</tbody>
+</table>
+<pre><code class="language-powershell">Test-NetConnection YOUR_LINUX_ADDRESS -Port 22
+Test-NetConnection YOUR_LINUX_ADDRESS -Port 3241
+</code></pre>
+<pre><code class="language-bash">sudo ss -lntp
+ip -brief address
+</code></pre>
+<p>Tailscale or another VPN is optional; no existing login identity is bundled. Join both machines to your own private network using the provider's official instructions, verify reachability, then enter the VPN address.</p>
+<p>For an existing frp deployment, <code>scripts/prepare-public-relay.ps1</code> generates server/client configuration using <code>-ServerHost</code>, <code>-OutputDirectory</code>, <code>-PublicSshPort</code> and <code>-PublicUsbPort</code>. Use a new directory. Generated tokens/configuration are private deployment files, never GitHub content. Install frps/frpc according to the selected upstream version and forward SSH plus TLS, not raw port 3240. Verify SSH identity on first use and investigate changes.</p>
+<p>Release all devices before applying listener changes with <code>configure-remote-listener.sh --listen 0.0.0.0:3241 --apply</code>. Use host settings when changing the address of the same host; replacing the host requires the explicit replace-host identity flow.</p></html>

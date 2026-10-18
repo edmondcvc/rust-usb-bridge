@@ -1,0 +1,65 @@
+name: Build clean Ubuntu image
+on:
+  workflow_dispatch:
+    inputs:
+      platform:
+        type: choice
+        options: [x86_64, uefi-arm64, raspi4, raspi5]
+        required: true
+      base_url:
+        description: Official cloud-images.ubuntu.com or cdimage.ubuntu.com base image URL
+        type: string
+        required: true
+      base_sha256:
+        description: SHA256 from the official Ubuntu manifest
+        type: string
+        required: true
+      ci_run_id:
+        description: Successful same-commit CI run with Linux binary packages
+        type: string
+        required: true
+permissions:
+  contents: read
+  actions: read
+jobs:
+  build:
+    runs-on: ${{ inputs.platform == 'x86_64' && 'ubuntu-24.04' || 'ubuntu-24.04-arm' }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Prepare verified inputs
+        env:
+          GH_TOKEN: ${{ github.token }}
+          BASE_URL: ${{ inputs.base_url }}
+          BASE_SHA256: ${{ inputs.base_sha256 }}
+          RUN_ID: ${{ inputs.ci_run_id }}
+          PLATFORM: ${{ inputs.platform }}
+        run: |
+          python3 -c 'import os,re; from urllib.parse import urlparse; u=urlparse(os.environ["BASE_URL"]); assert u.scheme=="https" and u.hostname in ("cloud-images.ubuntu.com","cdimage.ubuntu.com"); assert re.fullmatch("[a-fA-F0-9]{64}",os.environ["BASE_SHA256"])'
+          gh run view "$RUN_ID" --json conclusion,headSha > run.json
+          python3 -c 'import json,os; r=json.load(open("run.json")); assert r["conclusion"]=="success" and r["headSha"]==os.environ["GITHUB_SHA"]'
+          ARCH=aarch64; if [ "$PLATFORM" = x86_64 ]; then ARCH=x86_64; fi
+          gh run download "$RUN_ID" -n "linux-$ARCH" -D package
+          mkdir unpacked
+          tar -xzf package/*.tar.gz -C unpacked
+          curl --fail --location --proto '=https' "$BASE_URL" -o base.img
+          if [[ "$BASE_URL" == *.xz ]]; then mv base.img base.img.xz; fi
+          sudo apt-get update
+          sudo apt-get install -y libguestfs-tools qemu-utils xz-utils
+      - name: Build clean image (not hardware qualification)
+        env:
+          BASE_URL: ${{ inputs.base_url }}
+          BASE_SHA256: ${{ inputs.base_sha256 }}
+          PLATFORM: ${{ inputs.platform }}
+          LIBGUESTFS_BACKEND: direct
+        run: |
+          BASE=base.img; if [ -f base.img.xz ]; then BASE=base.img.xz; fi
+          sudo -E bash scripts/images/build-image.sh --platform "$PLATFORM" --base "$BASE" --base-sha256 "$BASE_SHA256" --base-url "$BASE_URL" --binary unpacked/usb-bridge-server --output image-output
+          sudo chown -R "$(id -u):$(id -g)" image-output
+          python3 scripts/release.py split --file image-output/*.img.gz --output image-output
+      - uses: actions/upload-artifact@v4
+        with:
+          name: image-${{ inputs.platform }}-UNVERIFIED-HARDWARE
+          path: |
+            image-output/*.part*
+            image-output/*.json
+            image-output/SHA256SUMS

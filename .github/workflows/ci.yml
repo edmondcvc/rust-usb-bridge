@@ -1,0 +1,99 @@
+name: Build and verify
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  source:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install -r docs/requirements.txt
+      - run: python scripts/check-docs.py --render
+      - run: python scripts/audit-public.py
+      - run: python -m unittest discover -s tests -p 'public_release_test.py' -v
+      - run: python -m unittest discover -s tests -p 'linux_installer_test.py' -v
+      - run: find scripts -name '*.sh' -exec bash -n {} \;
+  linux:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - runner: ubuntu-24.04
+            arch: x86_64
+            target: x86_64-unknown-linux-musl
+          - runner: ubuntu-24.04-arm
+            arch: aarch64
+            target: aarch64-unknown-linux-musl
+    runs-on: ${{ matrix.runner }}
+    steps:
+      - uses: actions/checkout@v4
+      - run: sudo apt-get update && sudo apt-get install -y musl-tools
+      - run: rustup show && rustup target add ${{ matrix.target }}
+      - name: Native architecture tests and static build
+        run: |
+          export CC=musl-gcc
+          export CARGO_TARGET_$(echo '${{ matrix.target }}' | tr '[:lower:]-' '[:upper:]_')_LINKER=musl-gcc
+          cargo test --release --locked --target ${{ matrix.target }} -p bridge-server -p bridge-common
+          cargo build --release --locked --target ${{ matrix.target }} -p bridge-server
+      - run: python3 -m pip install -r docs/requirements.txt && python3 scripts/check-docs.py --render
+      - run: python3 scripts/release.py linux --binary target/${{ matrix.target }}/release/usb-bridge-server --arch ${{ matrix.arch }}
+      - uses: actions/upload-artifact@v4
+        with:
+          name: linux-${{ matrix.arch }}
+          path: dist/*.tar.gz
+  windows:
+    needs: linux
+    runs-on: windows-2022
+    env:
+      RUSTFLAGS: -C target-feature=+crt-static
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: linux-*
+          merge-multiple: true
+          path: .tools/server-packages
+      - run: rustup show
+      - name: Unit tests (interactive tray callback tested separately on a desktop)
+        run: cargo test --release --locked --workspace -- --skip gui::tray_tests::tray_restore_wakes_hidden_window_without_an_egui_frame
+      - run: cargo build --release --locked -p bridge-client
+      - run: python -m pip install -r docs/requirements.txt; python scripts/check-docs.py --render
+      - name: Fetch unchanged signed vendor driver
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force dist/vendor | Out-Null
+          Invoke-WebRequest https://github.com/vadimgrn/usbip-win2/releases/download/v.0.9.8.1/USBip-0.9.8.1-x64.exe -OutFile dist/vendor/USBip-0.9.8.1-x64.exe
+          if ((Get-FileHash dist/vendor/USBip-0.9.8.1-x64.exe).Hash.ToLowerInvariant() -ne '38cad6d4432b52d5bb9409d9ad03b72fdffc4ada4cd3a48fbeca1a2752a8518a') { throw 'Driver hash mismatch' }
+          if ((Get-AuthenticodeSignature dist/vendor/USBip-0.9.8.1-x64.exe).Status -ne 'Valid') { throw 'Driver signature not valid' }
+      - name: Package and build setup
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force .tools/server-x86_64,.tools/server-aarch64 | Out-Null
+          tar -xzf .tools/server-packages/RustUSBBridge-Linux-0.2.0-rc.1-x86_64.tar.gz -C .tools/server-x86_64
+          tar -xzf .tools/server-packages/RustUSBBridge-Linux-0.2.0-rc.1-aarch64.tar.gz -C .tools/server-aarch64
+          ./scripts/package.ps1 -WindowsOnly -ReleaseVersion 0.2.0-rc.1 -WindowsBinary ./target/release/bridge-client.exe -LinuxBinary .tools/server-x86_64/usb-bridge-server -LinuxArm64Binary .tools/server-aarch64/usb-bridge-server
+          $env:BRIDGE_SETUP_PAYLOAD=(Resolve-Path ./dist/RustUSBBridge-Windows-0.2.0-rc.1-x64.zip).Path
+          cargo build --release --locked -p bridge-setup
+          if ($LASTEXITCODE) { throw 'Setup build failed' }
+          Copy-Item target/release/bridge-setup.exe dist/RustUSBBridge-Setup-0.2.0-rc.1-x64.exe
+          $p=Start-Process dist/RustUSBBridge-Setup-0.2.0-rc.1-x64.exe -ArgumentList '--check-payload --output payload-check.json' -PassThru
+          $p.WaitForExit()
+          if ($p.ExitCode -ne 0) { throw 'Payload check failed' }
+          python scripts/../tests/check-windows-runtime.py target/release/bridge-client.exe dist/RustUSBBridge-Setup-0.2.0-rc.1-x64.exe
+      - uses: actions/upload-artifact@v4
+        with:
+          name: windows-x64
+          path: |
+            dist/*.exe
+            dist/*.zip
+            payload-check.json

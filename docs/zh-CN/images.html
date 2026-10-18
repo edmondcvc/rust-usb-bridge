@@ -1,0 +1,61 @@
+<!doctype html><html lang="zh-CN"><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>images</title><style>body{font:17px/1.7 system-ui;max-width:1050px;margin:32px auto;padding:0 24px;color:#192b3a}a{color:#185899}pre{padding:16px;background:#f2f6f9;overflow:auto}table{border-collapse:collapse}td,th{border:1px solid #cdd8e0;padding:8px}img{max-width:100%}</style><h1 id="_1">纯净预装系统镜像</h1>
+<p><a href="../en/images.html">English</a> · <a href="support.html">支持状态</a></p>
+<p>镜像从经过校验的 Ubuntu 官方基础镜像构建，不从已部署电脑克隆。内容包含本项目服务、OpenSSH 和必要系统依赖，不包含 VirtualHere、他人 VPN 登录身份或原工作站应用。</p>
+<h2 id="_2">选择启动平台</h2>
+<table>
+<thead>
+<tr>
+<th>平台参数</th>
+<th>基础镜像</th>
+<th>启动目标</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>x86_64</code></td>
+<td>Ubuntu 24.04 amd64 云磁盘</td>
+<td>通用 x86_64，实际机器的固件启动模式须验证</td>
+</tr>
+<tr>
+<td><code>uefi-arm64</code></td>
+<td>Ubuntu 24.04 arm64 云磁盘</td>
+<td>通用 ARM64 UEFI，板卡固件和驱动须支持该 Ubuntu 系统</td>
+</tr>
+<tr>
+<td><code>raspi4</code></td>
+<td>Ubuntu 24.04 ARM64 树莓派预装磁盘</td>
+<td>树莓派 4</td>
+</tr>
+<tr>
+<td><code>raspi5</code></td>
+<td>Ubuntu 24.04 ARM64 树莓派预装磁盘</td>
+<td>树莓派 5</td>
+</tr>
+</tbody>
+</table>
+<p>即使上游镜像同时兼容 Pi 4／5，本项目也分别命名和验收。通用 UEFI ARM 镜像不能直接当成树莓派镜像使用。基础镜像目录：<a href="https://cloud-images.ubuntu.com/noble/current/">Ubuntu 云镜像</a>、<a href="https://cdimage.ubuntu.com/releases/24.04/release/">Ubuntu 树莓派镜像</a>。</p>
+<h2 id="linux">在 Linux 构建</h2>
+<p>使用与镜像 <strong>相同 CPU 架构</strong> 的 Linux 构建机，磁盘空间须能存放未压缩输入、输出和 libguestfs 环境；构建机可以是虚拟机。安装依赖，下载官方镜像和对应官方 <code>SHA256SUMS</code>，填写准确哈希，并使用同版本、对应架构的服务 ELF。</p>
+<pre><code class="language-bash">sudo apt install libguestfs-tools qemu-utils xz-utils python3
+sudo bash scripts/images/build-image.sh \
+  --platform x86_64 \
+  --base /work/noble-server-cloudimg-amd64.img \
+  --base-url https://cloud-images.ubuntu.com/noble/current/noble-server-cloudimg-amd64.img \
+  --base-sha256 YOUR_OFFICIAL_64_HEX_DIGIT_HASH \
+  --binary /work/usb-bridge-server \
+  --output /work/new-image-output
+</code></pre>
+<p>通用 ARM 使用 arm64 基础盘和 <code>--platform uefi-arm64</code>。树莓派使用官方 <code>...arm64+raspi.img.xz</code> 和 <code>--platform raspi4</code>／<code>raspi5</code>。不允许用私有机器快照代替。程序拒绝架构不符、哈希错误、已存在的输出目录和缺少 USB/IP 内核模块的镜像。<code>image-provenance.json</code> 记录来源、基础镜像哈希、最终镜像哈希及 <strong>待验证</strong> 的硬件验收状态。GitHub 的 <strong>Build clean Ubuntu image</strong> 手动工作流在对应架构 runner 上使用同一流程，要求输入同一提交成功的 CI 编号。</p>
+<h2 id="_3">下载、校验与写盘</h2>
+<p>只使用 Release 中实际提供的镜像附件；有构建脚本不等于镜像已经验收。RC 镜像在更新验收矩阵前均标为硬件待验证。若按 1 GiB 分卷发布，下载所有分卷及 <code>.volumes.json</code>，运行随 Release 提供的 <code>release-tools.py</code>：</p>
+<pre><code class="language-powershell">py release-tools.py merge --file .\IMAGE.img.gz.volumes.json --output .\merged
+</code></pre>
+<p>合并程序验证各分卷及完整压缩文件，拒绝覆盖已有输出。用支持 gzip 的工具解压 <code>.img.gz</code>，再按正规写盘工具的官方说明写入 <code>.img</code>。按型号与容量核对目标盘，因为写入会覆盖全部内容。镜像写到哪块盘就从哪块盘运行，不要覆盖当前正在运行的 Linux 系统盘。</p>
+<h2 id="_4">第一次启动</h2>
+<p>连接显示器、键盘和有 DHCP 的有线网络。首次启动生成独立机器身份、主机名、SSH 主机密钥和 TLS 身份，不预选 USB 共享。本机屏幕要求为 <code>operator</code>（或构建时指定的 <code>--username</code>）设置新密码，<strong>没有共用默认密码</strong>。在本机完成密码设置后，才能使用 SSH 密码配对。root 的 SSH 密码登录关闭；镜像不是带公开默认密码的无人值守系统。</p>
+<p>在屏幕或通过 <code>ip -brief address</code> 查看地址。仅对普通 ext4 根分区尝试扩容并记录结果，特别是非标准固件或存储布局，应检查 <code>df -h /</code>。镜像不包含 Wi-Fi 密码。随后按 <a href="installation.html">Windows 安装</a>和<a href="usage.html">配对使用</a>继续。</p>
+<pre><code class="language-bash">systemctl status rust-usb-firstboot rust-usb-account rust-usb-bridge ssh --no-pager
+sudo journalctl -u rust-usb-firstboot -b --no-pager
+df -h /
+</code></pre>
+<p>QEMU 启动通过只证明对应虚拟配置。每种实体 ARM 电脑和 Pi 型号仍需完成启动、网络、内核模块和真实 USB 验证后，才能宣布正式支持。</p></html>

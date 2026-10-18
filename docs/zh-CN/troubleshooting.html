@@ -1,0 +1,46 @@
+<!doctype html><html lang="zh-CN"><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>troubleshooting</title><style>body{font:17px/1.7 system-ui;max-width:1050px;margin:32px auto;padding:0 24px;color:#192b3a}a{color:#185899}pre{padding:16px;background:#f2f6f9;overflow:auto}table{border-collapse:collapse}td,th{border:1px solid #cdd8e0;padding:8px}img{max-width:100%}</style><h1 id="_1">故障处理</h1>
+<p><a href="../en/troubleshooting.html">English</a></p>
+<table>
+<thead>
+<tr>
+<th>现象</th>
+<th>检查方法</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>服务无法启动</td>
+<td>检查 journal、架构、内核模块和文件权限</td>
+</tr>
+<tr>
+<td>主机状态未知</td>
+<td>检查电源、网络、地址、SSH／TLS 端口；旧缓存不代表设备空闲</td>
+</tr>
+<tr>
+<td>密码或权限错误</td>
+<td>确认账户可 SSH 密码登录，且该密码可通过 sudo；不同密码不支持当前快捷授权</td>
+</tr>
+<tr>
+<td>主机指纹改变</td>
+<td>核对地址和是否重装，不直接删除旧信任绕过检查</td>
+</tr>
+<tr>
+<td>Windows 驱动未就绪</td>
+<td>检查安装日志和重启要求，使用安装器修复</td>
+</tr>
+<tr>
+<td>设备由其他电脑占用</td>
+<td>请对方主动断开；管理员仅核对指定会话后强制释放</td>
+</tr>
+<tr>
+<td>设备列表没有设备</td>
+<td>检查线缆、供电、Linux USB 枚举和是否被其他转发软件管理</td>
+</tr>
+<tr>
+<td>关闭后找不到窗口</td>
+<td>打开任务栏 ^，单击蓝色 USB 托盘图标</td>
+</tr>
+</tbody>
+</table>
+<p>保留实际报错，不通过清空身份或重装系统来猜测解决问题。导出日志后去除密码、私钥、邀请、主机名和真实地址，再提交 issue。提交系统版本、CPU 架构、内核、程序版本、设备 VID/PID、操作步骤及时间。</p>
+<p>安装日志：Linux <code>/var/log/rust-usb-bridge/</code>，Windows <code>C:\ProgramData\RustUsbBridge\logs</code>。共享失败与主机离线是不同问题。系统启动盘、挂载存储、维护输入设备和 USB hub 默认受保护，不应强行转发。</p></html>

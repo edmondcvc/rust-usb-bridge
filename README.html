@@ -1,0 +1,19 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>README</title><style>body{font:17px/1.7 system-ui;max-width:1050px;margin:32px auto;padding:0 24px;color:#192b3a}a{color:#185899}pre{padding:16px;background:#f2f6f9;overflow:auto}table{border-collapse:collapse}td,th{border:1px solid #cdd8e0;padding:8px}img{max-width:100%}</style><h1 id="rust-usb-bridge">Rust USB Bridge</h1>
+<p><a href="README.zh-CN.html">中文</a></p>
+<p>Share physical USB devices attached to a Linux host with Windows computers. Each device has one owner at a time; different computers can use different devices concurrently.</p>
+<p><a href="docs/en/installation.html">Download and install</a> | <a href="docs/en/linux-setup.html">Start with a new Linux computer</a> | <a href="docs/en/usage.html">Pair and use devices</a> | <a href="docs/en/building.html">Build from source</a></p>
+<h2 id="release-status">Release status</h2>
+<p>The first public release is <strong>0.2.0-rc.1</strong>. It is a prerelease, not a claim of production certification. Linux x86_64 and aarch64 binaries are separate; generic UEFI ARM64 and Raspberry Pi 4/5 require different boot images. Windows is x64. See the <a href="docs/en/support.html">support and acceptance matrix</a>.</p>
+<p>The application uses Linux <code>usbip-host</code>, mutual TLS, and the unchanged signed usbip-win2 0.9.8.1 driver (PnP version 12.1.30.403). Original device applications/drivers remain necessary. The application installer is not commercially code-signed.</p>
+<h2 id="quick-path">Quick path</h2>
+<ol>
+<li>Prepare Ubuntu Server 24.04 LTS, OpenSSH, Python 3 and a sudo-capable account.</li>
+<li>Download the pinned release's <code>install.sh</code>, review it, then run it with sudo. An offline tarball uses the same installer.</li>
+<li>Install the Windows setup executable; reboot if the driver installer requests it.</li>
+<li>Enter the Linux address, username and password, verify the SSH host fingerprint, and select an available USB device.</li>
+<li>Close the window to keep it in the tray; single-click the blue USB tray icon to restore it.</li>
+</ol>
+<p>Storage must be safely ejected before releasing it. A network disconnect is not an emergency stop for machinery. Kernel transport support does not prove compatibility with every physical device.</p>
+<h2 id="more">More</h2>
+<p><a href="docs/en/images.html">Images</a> · <a href="docs/en/installation.html#offline-installation">Offline installation</a> · <a href="docs/en/networking.html">Remote networking</a> · <a href="docs/en/troubleshooting.html">Troubleshooting</a> · <a href="CONTRIBUTING.html">Contributing</a> · <a href="SECURITY.html">Security</a> · <a href="CHANGELOG.html">Changelog</a></p>
+<p>MIT covers this application. Third-party components retain their own licenses; see <a href="THIRD_PARTY_NOTICES.html">notices</a> and <code>THIRD_PARTY_LICENSES/</code>. No account password, server identity, private key, or existing pairing is included in a release.</p></html>

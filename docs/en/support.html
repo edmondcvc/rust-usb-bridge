@@ -1,0 +1,56 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>support</title><style>body{font:17px/1.7 system-ui;max-width:1050px;margin:32px auto;padding:0 24px;color:#192b3a}a{color:#185899}pre{padding:16px;background:#f2f6f9;overflow:auto}table{border-collapse:collapse}td,th{border:1px solid #cdd8e0;padding:8px}img{max-width:100%}</style><h1 id="platform-support-and-acceptance">Platform support and acceptance</h1>
+<p><a href="../zh-CN/support.html">中文</a>
+This is a prerelease. Targets below are not blanket production-certification claims. ARM/Pi physical hardware is unavailable, so stable support waits for hardware acceptance.</p>
+<table>
+<thead>
+<tr>
+<th>Target</th>
+<th>OS baseline</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Linux x86_64</td>
+<td>Ubuntu Server 24.04 LTS</td>
+<td>Build / automated checks; public-version physical acceptance pending</td>
+</tr>
+<tr>
+<td>Generic UEFI ARM64</td>
+<td>Ubuntu Server 24.04 LTS ARM64</td>
+<td>Build target; physical boot and USB pending</td>
+</tr>
+<tr>
+<td>Raspberry Pi 4</td>
+<td>Ubuntu Server 24.04 LTS raspi 64-bit</td>
+<td>Image recipe; board acceptance pending</td>
+</tr>
+<tr>
+<td>Raspberry Pi 5</td>
+<td>Ubuntu Server 24.04 LTS raspi 64-bit</td>
+<td>Image recipe; board acceptance pending</td>
+</tr>
+<tr>
+<td>Windows x64</td>
+<td>Windows 10 1903+ / Windows 11</td>
+<td>Installer target; public-version clean-machine acceptance pending</td>
+</tr>
+<tr>
+<td>Debian / other systemd distributions</td>
+<td>Matching USB/IP kernel required</td>
+<td>Compatibility path; not formally qualified</td>
+</tr>
+<tr>
+<td>VM</td>
+<td>Explicit physical USB passthrough required</td>
+<td>Boot/mock tests do not prove physical forwarding</td>
+</tr>
+<tr>
+<td>Containers / WSL</td>
+<td>Host kernel, sysfs, privileges required</td>
+<td>Not a supported production installation route</td>
+</tr>
+</tbody>
+</table>
+<p>Stable gate: clean installation, pairing, real USB data transfer/release, network drop and reboot recovery per platform; Pi 4/5 are separate records. Two Windows machines must use different devices concurrently, same-device ownership must be exclusive, and releasing one computer must not affect the other. Installer checks, mock USB, ARM runners and VM tests are not substitutes.</p>
+<p>Every hardware record must identify version, source commit, artifact hash, OS/kernel, board model, procedure and observed result. Publish <code>v0.2.0</code> only after all target hardware passes. Compatibility of each device type, especially audio/video and machinery, requires corresponding real-device testing.</p></html>

@@ -1,0 +1,27 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>building</title><style>body{font:17px/1.7 system-ui;max-width:1050px;margin:32px auto;padding:0 24px;color:#192b3a}a{color:#185899}pre{padding:16px;background:#f2f6f9;overflow:auto}table{border-collapse:collapse}td,th{border:1px solid #cdd8e0;padding:8px}img{max-width:100%}</style><h1 id="build-and-release">Build and release</h1>
+<p><a href="../zh-CN/building.html">中文</a>
+Use the pinned Rust toolchain and Cargo.lock. Windows needs MSVC Build Tools/Windows SDK or a GNU toolchain. Linux needs a C compiler; cross builds also need the target linker.</p>
+<pre><code class="language-bash">git clone https://github.com/edmondcvc/rust-usb-bridge.git
+cd rust-usb-bridge
+rustup show
+cargo test --locked --workspace
+bash scripts/build-linux.sh
+python3 scripts/release.py linux --binary target/release/usb-bridge-server --arch x86_64
+</code></pre>
+<pre><code class="language-bash"># Ubuntu x86_64 -&gt; ARM64 (GNU/glibc)
+sudo apt install gcc-aarch64-linux-gnu
+rustup target add aarch64-unknown-linux-gnu
+export CARGO_TARGET_AARCH64_UNKNOWN_LINUX_GNU_LINKER=aarch64-linux-gnu-gcc
+export CC_aarch64_unknown_linux_gnu=aarch64-linux-gnu-gcc
+bash scripts/build-linux.sh aarch64-unknown-linux-gnu
+python3 scripts/release.py linux --binary target/aarch64-unknown-linux-gnu/release/usb-bridge-server --arch aarch64
+</code></pre>
+<pre><code class="language-powershell">.\scripts\build.ps1 -Action Test -Target x86_64-pc-windows-msvc
+.\scripts\build.ps1 -Action Build -Package bridge-client -Target x86_64-pc-windows-msvc
+# Obtain the unchanged upstream driver and verify its pinned SHA256 first.
+.\scripts\package.ps1 -WindowsBinary .\target\x86_64-pc-windows-msvc\release\bridge-client.exe -DriverInstaller C:\build\USBip-0.9.8.1-x64.exe -LinuxBinary C:\build\linux-x86_64\usb-bridge-server -LinuxArm64Binary C:\build\linux-aarch64\usb-bridge-server -ReleaseVersion 0.2.0-rc.1
+.\scripts\build.ps1 -Action Build -Package bridge-setup -Target x86_64-pc-windows-msvc -SetupPayload .\dist\RustUSBBridge-Windows-0.2.0-rc.1-x64.zip
+</code></pre>
+<p>The root third-party notices give the driver source and pinned hash. Keep the GNU compiler, Cargo cache and target directory on ASCII-only paths on Windows. Build entry points accept explicit Cargo, Rustup, compiler-bin and target options.</p>
+<p>CI tests/builds Ubuntu x86_64, Ubuntu ARM64 and Windows x64 separately. Artifacts are retained first; the manually dispatched release workflow collects verified assets and creates a prerelease. An RC cannot bypass physical acceptance and be called a stable release.</p>
+<p>The packaging example expects both checked Linux binaries at the explicit C:\build paths. On Windows, install cargo-zigbuild and an official Zig toolchain, add both musl Rust targets, then run scripts/build-linux.ps1 separately with -Target x86_64-unknown-linux-musl and -Target aarch64-unknown-linux-musl. Use -ZigExe for an explicit Zig executable. TestCompile only compiles Linux tests; execute them on matching Linux hardware or a clearly labelled VM.</p></html>

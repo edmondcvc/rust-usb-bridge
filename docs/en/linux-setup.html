@@ -1,0 +1,51 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>linux-setup</title><style>body{font:17px/1.7 system-ui;max-width:1050px;margin:32px auto;padding:0 24px;color:#192b3a}a{color:#185899}pre{padding:16px;background:#f2f6f9;overflow:auto}table{border-collapse:collapse}td,th{border:1px solid #cdd8e0;padding:8px}img{max-width:100%}</style><h1 id="prepare-a-linux-host">Prepare a Linux host</h1>
+<p><a href="../zh-CN/linux-setup.html">中文</a> · <a href="../../README.html">Home</a></p>
+<h2 id="choose-a-route">Choose a route</h2>
+<table>
+<thead>
+<tr>
+<th>Hardware/state</th>
+<th>Route</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>New Intel/AMD 64-bit computer</td>
+<td>Official Ubuntu Server 24.04 LTS amd64 installer, then the service package</td>
+</tr>
+<tr>
+<td>Generic ARM64 with UEFI</td>
+<td>Official Ubuntu Server ARM64 installer/cloud image appropriate to the hardware</td>
+</tr>
+<tr>
+<td>Raspberry Pi 4 or 5</td>
+<td>Ubuntu Server 24.04 LTS 64-bit Raspberry Pi image, not the generic UEFI ARM image</td>
+</tr>
+<tr>
+<td>Existing Ubuntu/Debian</td>
+<td>Keep the OS and start at prerequisites below</td>
+</tr>
+<tr>
+<td>No internet on the host</td>
+<td>Prepare OS prerequisites on the image first; transfer the offline software package</td>
+</tr>
+</tbody>
+</table>
+<p>Follow the <a href="https://documentation.ubuntu.com/server/how-to/installation/index.html">Ubuntu installer guide</a> or <a href="https://www.raspberrypi.com/documentation/computers/getting-started.html">Raspberry Pi boot-media guide</a>. Download from official links and check the published checksum. Writing boot media overwrites the selected target: identify the disk by model and size. A preinstalled <code>.img</code> runs from the written disk; an installer ISO installs the OS onto another selected disk.</p>
+<p>For a new machine, attach a display, keyboard, wired network and suitable power supply. Create your own account (the GUI suggests <code>operator</code>, but that account is not created by the service installer). Enable OpenSSH during Ubuntu setup. Use a unique password; no default password is supplied by this project. Update the system and reboot after kernel updates.</p>
+<h2 id="prerequisites">Prerequisites</h2>
+<pre><code class="language-bash">sudo apt update
+sudo apt install openssh-server python3 kmod util-linux ca-certificates curl
+sudo systemctl enable --now ssh
+uname -m
+uname -r
+ip -brief address
+sudo modprobe usbip-core
+sudo modprobe usbip-host
+</code></pre>
+<p>Expected architecture: <code>x86_64</code> or <code>aarch64</code>; expected module directory: <code>/sys/bus/usb/drivers/usbip-host</code>. If <code>modprobe</code> fails on an Ubuntu generic kernel, try <code>sudo apt install linux-modules-extra-$(uname -r)</code> and reboot if required. On Raspberry Pi, use modules matching the installed <strong>raspi</strong> kernel; do not install x86 generic kernel packages. Debian and custom kernels need their own matching USB/IP module configuration.</p>
+<p>Run <code>sudo -v</code> as the account you will enter on Windows. SSH authentication and sudo must accept that account's password for the current password-based GUI enrollment. Key-only SSH setups can use the advanced CA/code pairing route in <a href="usage.html">usage</a>.</p>
+<p>For Wi-Fi use the network configuration supplied by your OS. Find the new address with <code>ip -brief address</code>; there is no project-wide fixed IP. Prefer a DHCP reservation on the router. Synchronize the system clock so certificate validity checks work. Check local SSH key fingerprints:</p>
+<pre><code class="language-bash">for key in /etc/ssh/ssh_host_*_key.pub; do ssh-keygen -lf &quot;$key&quot;; done
+</code></pre>
+<p>Then continue with <a href="installation.html">service and Windows installation</a>. Success means SSH reaches the intended machine and the correct kernel module loads; it does not yet mean a USB device has been forwarded.</p></html>

@@ -1,0 +1,42 @@
+[package]
+name = "bridge-client"
+version = "0.2.0-rc.1"
+edition = "2021"
+license = "MIT"
+description = "Chinese USB/IP TLS client and Windows driver service"
+
+[[bin]]
+name = "bridge-client"
+path = "src/main.rs"
+
+[dependencies]
+anyhow = "1"
+bridge-common = { path = "../bridge-common" }
+clap = { version = "4", features = ["derive"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+tokio = { version = "1", features = ["full"] }
+rustls = { version = "0.23", default-features = false, features = ["ring", "std", "tls12"] }
+tokio-rustls = { version = "0.26", default-features = false, features = ["ring", "tls12"] }
+rustls-pemfile = "2"
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+tracing-appender = "0.2"
+socket2 = { version = "0.6", features = ["all"] }
+
+[target.'cfg(windows)'.dependencies]
+zeroize = "1"
+image = { version = "0.25", default-features = false, features = ["png"] }
+eframe = { version = "0.31", default-features = false, features = ["glow", "default_fonts"] }
+rfd = "0.15"
+windows-service = "0.8"
+tray-icon = "0.19"
+raw-window-handle = "0.6"
+windows-sys = { version = "0.59", features = ["Win32_Foundation", "Win32_UI_WindowsAndMessaging", "Win32_System_Threading"] }
+
+[dev-dependencies]
+tempfile = "3"
+rcgen = "0.13"
+
+
+

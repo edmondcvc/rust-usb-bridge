@@ -1,0 +1,27 @@
+<!doctype html><html lang="zh-CN"><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>building</title><style>body{font:17px/1.7 system-ui;max-width:1050px;margin:32px auto;padding:0 24px;color:#192b3a}a{color:#185899}pre{padding:16px;background:#f2f6f9;overflow:auto}table{border-collapse:collapse}td,th{border:1px solid #cdd8e0;padding:8px}img{max-width:100%}</style><h1 id="_1">源码构建与发布</h1>
+<p><a href="../en/building.html">English</a>
+使用仓库固定的 Rust 工具链和 Cargo.lock。Windows 需要对应的 MSVC Build Tools／Windows SDK，或 GNU 工具链。Linux 需要 C 编译器；跨架构需安装对应链接器。</p>
+<pre><code class="language-bash">git clone https://github.com/edmondcvc/rust-usb-bridge.git
+cd rust-usb-bridge
+rustup show
+cargo test --locked --workspace
+bash scripts/build-linux.sh
+python3 scripts/release.py linux --binary target/release/usb-bridge-server --arch x86_64
+</code></pre>
+<pre><code class="language-bash"># Ubuntu x86_64 -&gt; ARM64 (GNU/glibc)
+sudo apt install gcc-aarch64-linux-gnu
+rustup target add aarch64-unknown-linux-gnu
+export CARGO_TARGET_AARCH64_UNKNOWN_LINUX_GNU_LINKER=aarch64-linux-gnu-gcc
+export CC_aarch64_unknown_linux_gnu=aarch64-linux-gnu-gcc
+bash scripts/build-linux.sh aarch64-unknown-linux-gnu
+python3 scripts/release.py linux --binary target/aarch64-unknown-linux-gnu/release/usb-bridge-server --arch aarch64
+</code></pre>
+<pre><code class="language-powershell">.\scripts\build.ps1 -Action Test -Target x86_64-pc-windows-msvc
+.\scripts\build.ps1 -Action Build -Package bridge-client -Target x86_64-pc-windows-msvc
+# Obtain the unchanged upstream driver and verify its pinned SHA256 first.
+.\scripts\package.ps1 -WindowsBinary .\target\x86_64-pc-windows-msvc\release\bridge-client.exe -DriverInstaller C:\build\USBip-0.9.8.1-x64.exe -LinuxBinary C:\build\linux-x86_64\usb-bridge-server -LinuxArm64Binary C:\build\linux-aarch64\usb-bridge-server -ReleaseVersion 0.2.0-rc.1
+.\scripts\build.ps1 -Action Build -Package bridge-setup -Target x86_64-pc-windows-msvc -SetupPayload .\dist\RustUSBBridge-Windows-0.2.0-rc.1-x64.zip
+</code></pre>
+<p>上游驱动来源和哈希见根目录第三方声明。GNU Windows 构建的编译器、Cargo 缓存和 target 目录使用纯英文路径，避免 GNU 链接器路径兼容问题。构建脚本的 <code>-CargoExe</code>、<code>-CargoHome</code>、<code>-RustupHome</code>、<code>-ToolchainBin</code>、<code>-Target</code> 可显式指定工具。</p>
+<p>CI 分别在 Ubuntu x86_64、Ubuntu ARM64 和 Windows x64 执行测试及构建；构建产物先保留为工作流附件。手动触发的发布流程收集附件、校验、创建预发布版，<code>rc</code> 不能绕过实机验收成为正式版。</p>
+<p>上面的打包命令要求先把两种架构已校验的 Linux 二进制放到指定 C:\build 路径。在 Windows 中安装 cargo-zigbuild 和官方 Zig 工具链、添加两个 musl Rust target 后，分别运行 scripts/build-linux.ps1 -Target x86_64-unknown-linux-musl 与 -Target aarch64-unknown-linux-musl；可用 -ZigExe 显式指定 Zig。TestCompile 只编译测试，运行测试需要对应架构 Linux，虚拟机结果应明确标注。</p></html>
