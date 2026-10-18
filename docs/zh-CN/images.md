@@ -20,7 +20,8 @@
 使用与镜像 **相同 CPU 架构** 的 Linux 构建机，磁盘空间须能存放未压缩输入、输出和 libguestfs 环境；构建机可以是虚拟机。安装依赖，下载官方镜像和对应官方 `SHA256SUMS`，填写准确哈希，并使用同版本、对应架构的服务 ELF。
 
 ```bash
-sudo apt install libguestfs-tools qemu-utils xz-utils python3 dhcpcd-base
+sudo apt install libguestfs-tools qemu-utils xz-utils python3 dhcpcd-base dpkg-dev
+printf 'dhcpcd-base\n' | sudo tee "/usr/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH)/guestfs/supermin.d/zz-rust-usb-dhcp"
 bash scripts/images/build-image.sh \
   --platform x86_64 \
   --base /work/noble-server-cloudimg-amd64.img \

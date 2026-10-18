@@ -44,7 +44,9 @@ jobs:
           curl --fail --location --proto '=https' "$BASE_URL" -o base.img
           if [[ "$BASE_URL" == *.xz ]]; then mv base.img base.img.xz; fi
           sudo apt-get update
-          sudo apt-get install -y libguestfs-tools qemu-utils xz-utils acl dhcpcd-base
+          sudo apt-get install -y libguestfs-tools qemu-utils xz-utils acl dhcpcd-base dpkg-dev
+          # Noble's supermin package list does not include dhcpcd-base by default.
+          printf 'dhcpcd-base\n' | sudo tee "/usr/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH)/guestfs/supermin.d/zz-rust-usb-dhcp"
           # Noble's passt profile rejects guestfs PID files. Use libguestfs's
           # built-in QEMU user networking fallback on this disposable builder.
           sudo apt-get remove -y passt
