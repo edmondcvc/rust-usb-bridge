@@ -4,6 +4,18 @@
 
 Images are constructed from checksummed official Ubuntu bases, never from a deployed computer. They include this project's service, OpenSSH and required OS dependencies. VirtualHere, VPN login identities and other workstation applications are not included.
 
+## RC image download and validation
+
+The [v0.2.0-rc.1 release](https://github.com/edmondcvc/rust-usb-bridge/releases/tag/v0.2.0-rc.1) provides an x86_64 image preview. Download its `.img.gz.part001`, `.img.gz.volumes.json`, provenance and validation JSON, `SHA256SUMS-images-x86_64-0.2.0-rc.1`, and `release-tools.py` into one directory. This image fits in one volume; retain the `.part001` name. Merge and verify it with:
+
+```powershell
+py release-tools.py merge --file .\RustUSBBridge-Ubuntu24.04-0.2.0-rc.1-x86_64.img.gz.volumes.json --output .\merged
+```
+
+The image was built from source `26fdb64c2fc45919aafb322fd781fa1b94ba497e`; the exact source is `RustUSBBridge-ImageSource-0.2.0-rc.1-26fdb64.zip`. The original RC application packages and tag retain source `5e183c74e9b834655182a71c55a1173c79295222`.
+
+Two independent x86_64 QEMU boots passed: service/TLS availability, distinct machine IDs/SSH host keys/service CAs, empty initial pairing state and root expansion to an 8-GiB virtual disk. Physical boot, real USB transfer, interactive first-password entry and Windows pairing with this image remain pending. Generic UEFI ARM64, Pi 4 and Pi 5 image builds succeeded, but those images are not attached to this release pending further boot checks. See the [validation record](../validation.md).
+
 ## Select the boot platform
 
 | Platform argument | Base | Boot target |

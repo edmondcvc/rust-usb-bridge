@@ -53,4 +53,41 @@ This is a prerelease. Targets below are not blanket production-certification cla
 </tbody>
 </table>
 <p>Stable gate: clean installation, pairing, real USB data transfer/release, network drop and reboot recovery per platform; Pi 4/5 are separate records. Two Windows machines must use different devices concurrently, same-device ownership must be exclusive, and releasing one computer must not affect the other. Installer checks, mock USB, ARM runners and VM tests are not substitutes.</p>
-<p>Every hardware record must identify version, source commit, artifact hash, OS/kernel, board model, procedure and observed result. Publish <code>v0.2.0</code> only after all target hardware passes. Compatibility of each device type, especially audio/video and machinery, requires corresponding real-device testing.</p></html>
+<p>Every hardware record must identify version, source commit, artifact hash, OS/kernel, board model, procedure and observed result. Publish <code>v0.2.0</code> only after all target hardware passes. Compatibility of each device type, especially audio/video and machinery, requires corresponding real-device testing.</p>
+<h2 id="published-rc-installation-validation-2026-10-18">Published RC installation validation — 2026-10-18</h2>
+<p>Tested the published <code>v0.2.0-rc.1</code> assets from source commit <code>5e183c74e9b834655182a71c55a1173c79295222</code> in an isolated x86_64 QEMU VM, Ubuntu 24.04, kernel <code>6.8.0-147-generic</code>. The Linux package SHA256 was <code>f647c757e26d5ebcaa1b1d731280f7dc953808fe5cbcab2b7a020440bc758684</code>; the online installer SHA256 was <code>4b0cff51ee39b1ca701976d181afd88159ab82e4a8878b2ac7992158370d23e0</code>.</p>
+<table>
+<thead>
+<tr>
+<th>Procedure</th>
+<th>Observed result</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Online install without USB/IP modules</td>
+<td>Refused before creating the application installation directory</td>
+</tr>
+<tr>
+<td>Install matching kernel modules, retry published online installer</td>
+<td>Service active, version <code>0.2.0-rc.1</code></td>
+</tr>
+<tr>
+<td>Verify package checksums, reinstall offline</td>
+<td>Service active; configuration and CA hashes unchanged</td>
+</tr>
+<tr>
+<td>Roll back using a complete backup</td>
+<td>Service active; configuration and CA hashes unchanged</td>
+</tr>
+<tr>
+<td>Request rollback using an incomplete backup</td>
+<td>Refused before stopping the running service</td>
+</tr>
+<tr>
+<td>Uninstall, then reinstall offline</td>
+<td>Own binary/service removed; retained configuration and CA reused; service active</td>
+</tr>
+</tbody>
+</table>
+<p>Both rollback binaries were the same RC version: this validates the command and identity retention, not an older-version compatibility matrix. No Windows client was paired in this VM and no physical USB was attached. These results do not establish actual paired-client retention, hardware USB forwarding, or boot-image acceptance.</p></html>

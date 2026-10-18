@@ -18,7 +18,7 @@ Recorded on 2026-10-18. These checks qualify an RC; they do not establish physic
 | Linux x86_64 and ARM64 binaries / 双架构 Linux 二进制 | Built and tested / 已编译与测试 | Static musl ELF; native architecture CI executes server/common tests |
 | Published online/offline installation / 公开在线与离线安装 | Passed in VM / 虚拟机通过 | Ubuntu 24.04 kernel 6.8.0-147-generic; repeat install, complete/incomplete backup guards, uninstall/reinstall and retained configuration/CA |
 | Image identity initialization / 镜像身份初始化 | Passed / 通过 | Actual Linux executable; two independent CAs and repeat-start identity retention; host/USB operations stubbed |
-| Boot images / 启动镜像 | Pending / 待验证 | Recipes and workflows supplied; a successful recipe syntax check is not a boot test |
+| Boot images / 启动镜像 | x86_64 virtual boot passed / x86_64 虚拟启动通过 | Four platform builds succeeded; two independent x86_64 boots passed; physical boot and USB remain pending |
 | Physical USB matrix / 真实 USB 矩阵 | Pending / 待验收 | x86_64, generic UEFI ARM64, Raspberry Pi 4 and Pi 5; dual Windows device ownership and recovery |
 
 Published RC source `5e183c74e9b834655182a71c55a1173c79295222` passed [hosted CI](https://github.com/edmondcvc/rust-usb-bridge/actions/runs/39121730091). Subsequent image-build fixes at `26fdb64c2fc45919aafb322fd781fa1b94ba497e` passed [all four CI jobs](https://github.com/edmondcvc/rust-usb-bridge/actions/runs/39130619379). The published RC tag and its existing release assets remain pinned to the original release source.
@@ -32,3 +32,7 @@ The Raspberry Pi 4 artifact from [image run 39128753131](https://github.com/edmo
 The existing native HWND tray restoration is retained. The RC UI was opened in an isolated demo for tutorial screenshots; the current RC installer has not replaced the user's working installation. Actual click, driver restart and end-to-end device checks remain explicit release gates.
 
 保留现有原生 HWND 托盘恢复实现；教程截图来自 RC 的隔离演示。此次未用 RC 安装器覆盖用户正常使用的安装。真实点击、驱动重启和设备端到端检查仍是明确的发布门槛。
+
+The x86_64 image from [run 39131245276](https://github.com/edmondcvc/rust-usb-bridge/actions/runs/39131245276) passed archive/volume checks and read-only filesystem inspection. Two fresh QEMU TCG boots on separate 8-GiB disks reached Ubuntu 24.04.5 login with kernel `6.8.0-147-generic`. Both exposed TLS 1.3 with certificates matching the generated disk identity, expanded the root filesystem to 7,515,123,712 bytes, and generated distinct machine IDs, SSH host keys and service CAs. Both test VMs shut down. No physical USB was attached; first-password interaction and Windows enrollment with the image were not tested. The clean unbooted template, exact image source and public validation metadata are provided separately from the original RC application assets.
+
+x86_64 镜像的 ZIP、分卷及只读文件系统检查通过；两个独立的 8 GiB QEMU TCG 磁盘均启动到 Ubuntu 24.04.5 登录界面（内核见上段）。TLS 1.3 可访问且证书与各自磁盘身份匹配，根文件系统扩容到 7,515,123,712 字节，机器 ID、SSH 主机密钥与服务 CA 各自独立。两台测试虚拟机均已关闭。未接入真实 USB，未验证首次密码交互输入及此镜像的 Windows 配对。公开的是从未启动的纯净模板、镜像对应源码与公开验证元数据；原 RC 应用附件保持不变。

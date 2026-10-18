@@ -4,6 +4,18 @@
 
 镜像从经过校验的 Ubuntu 官方基础镜像构建，不从已部署电脑克隆。内容包含本项目服务、OpenSSH 和必要系统依赖，不包含 VirtualHere、他人 VPN 登录身份或原工作站应用。
 
+## RC 镜像下载与验证状态
+
+[v0.2.0-rc.1 发布页](https://github.com/edmondcvc/rust-usb-bridge/releases/tag/v0.2.0-rc.1)提供 x86_64 预览镜像。将对应的 `.img.gz.part001`、`.img.gz.volumes.json`、来源和验证 JSON、`SHA256SUMS-images-x86_64-0.2.0-rc.1` 以及 `release-tools.py` 下载到同一目录。本镜像只有一个分卷，请保留 `.part001` 文件名。使用以下命令合并并校验：
+
+```powershell
+py release-tools.py merge --file .\RustUSBBridge-Ubuntu24.04-0.2.0-rc.1-x86_64.img.gz.volumes.json --output .\merged
+```
+
+镜像使用源码 `26fdb64c2fc45919aafb322fd781fa1b94ba497e` 构建，对应完整源码为 `RustUSBBridge-ImageSource-0.2.0-rc.1-26fdb64.zip`。原 RC 应用安装包和标签仍使用源码 `5e183c74e9b834655182a71c55a1173c79295222`。
+
+两次独立 x86_64 QEMU 启动已通过：服务与 TLS 可访问、机器 ID／SSH 主机密钥／服务 CA 各自独立、初始配对状态为空、根分区扩展到 8 GiB 虚拟磁盘。物理机器启动、真实 USB 传输、首次密码的交互输入及使用此镜像与 Windows 配对仍待验证。通用 UEFI ARM64、树莓派 4、树莓派 5 镜像均已构建成功，进一步启动检查前暂不附加到 Release。详见[验证记录](../validation.md)。
+
 ## 选择启动平台
 
 | 平台参数 | 基础镜像 | 启动目标 |

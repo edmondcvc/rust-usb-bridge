@@ -1,6 +1,12 @@
 <!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>images</title><style>body{font:17px/1.7 system-ui;max-width:1050px;margin:32px auto;padding:0 24px;color:#192b3a}a{color:#185899}pre{padding:16px;background:#f2f6f9;overflow:auto}table{border-collapse:collapse}td,th{border:1px solid #cdd8e0;padding:8px}img{max-width:100%}</style><h1 id="clean-preinstalled-images">Clean preinstalled images</h1>
 <p><a href="../zh-CN/images.html">中文</a> · <a href="support.html">Support status</a></p>
 <p>Images are constructed from checksummed official Ubuntu bases, never from a deployed computer. They include this project's service, OpenSSH and required OS dependencies. VirtualHere, VPN login identities and other workstation applications are not included.</p>
+<h2 id="rc-image-download-and-validation">RC image download and validation</h2>
+<p>The <a href="https://github.com/edmondcvc/rust-usb-bridge/releases/tag/v0.2.0-rc.1">v0.2.0-rc.1 release</a> provides an x86_64 image preview. Download its <code>.img.gz.part001</code>, <code>.img.gz.volumes.json</code>, provenance and validation JSON, <code>SHA256SUMS-images-x86_64-0.2.0-rc.1</code>, and <code>release-tools.py</code> into one directory. This image fits in one volume; retain the <code>.part001</code> name. Merge and verify it with:</p>
+<pre><code class="language-powershell">py release-tools.py merge --file .\RustUSBBridge-Ubuntu24.04-0.2.0-rc.1-x86_64.img.gz.volumes.json --output .\merged
+</code></pre>
+<p>The image was built from source <code>26fdb64c2fc45919aafb322fd781fa1b94ba497e</code>; the exact source is <code>RustUSBBridge-ImageSource-0.2.0-rc.1-26fdb64.zip</code>. The original RC application packages and tag retain source <code>5e183c74e9b834655182a71c55a1173c79295222</code>.</p>
+<p>Two independent x86_64 QEMU boots passed: service/TLS availability, distinct machine IDs/SSH host keys/service CAs, empty initial pairing state and root expansion to an 8-GiB virtual disk. Physical boot, real USB transfer, interactive first-password entry and Windows pairing with this image remain pending. Generic UEFI ARM64, Pi 4 and Pi 5 image builds succeeded, but those images are not attached to this release pending further boot checks. See the <a href="../validation.html">validation record</a>.</p>
 <h2 id="select-the-boot-platform">Select the boot platform</h2>
 <table>
 <thead>
@@ -36,7 +42,8 @@
 <p>Pi 4 and 5 are separately named and accepted even when the upstream base supports both. Do not write a generic UEFI disk to a Pi and assume it has the required board boot files. Base image catalogs: <a href="https://cloud-images.ubuntu.com/noble/current/">Ubuntu cloud images</a>, <a href="https://cdimage.ubuntu.com/releases/24.04/release/">Ubuntu Pi releases</a>.</p>
 <h2 id="build-on-linux">Build on Linux</h2>
 <p>Use a Linux builder of the <strong>same CPU architecture</strong> as the image with enough disk space for the uncompressed input, output and libguestfs appliance. A VM is acceptable for construction. Install <code>libguestfs-tools qemu-utils xz-utils python3</code>, obtain the official image and its official <code>SHA256SUMS</code>, then supply the exact hash. Use the architecture-matched service ELF from the same project release.</p>
-<pre><code class="language-bash">sudo apt install libguestfs-tools qemu-utils xz-utils python3
+<pre><code class="language-bash">sudo apt install libguestfs-tools qemu-utils xz-utils python3 dhcpcd-base dpkg-dev
+printf 'dhcpcd-base\n' | sudo tee &quot;/usr/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH)/guestfs/supermin.d/zz-rust-usb-dhcp&quot;
 bash scripts/images/build-image.sh \
   --platform x86_64 \
   --base /work/noble-server-cloudimg-amd64.img \
@@ -47,6 +54,15 @@ bash scripts/images/build-image.sh \
 </code></pre>
 <p>ARM UEFI uses the arm64 base and <code>--platform uefi-arm64</code>. Pi uses an official <code>...arm64+raspi.img.xz</code> and <code>--platform raspi4</code> or <code>raspi5</code>. Never substitute a private machine snapshot. The build refuses incorrect architecture, wrong base checksum, reused output directories and missing USB/IP modules. It records base URL/hash, final image hash and <strong>pending</strong> hardware acceptance in <code>image-provenance.json</code>. The manual GitHub <strong>Build clean Ubuntu image</strong> workflow provides the same recipe with native architecture runners and a successful same-commit CI input.</p>
 <p>Run the image builder as your normal account in a user-writable directory. Only dependency installation needs sudo; libguestfs edits the guest filesystem without requiring builder root access.</p>
+<p>On Ubuntu, supermin can fail when <code>/boot/vmlinuz-*</code> is readable only by root. Copy the public kernel into a user-writable working directory and identify its matching modules (see the <a href="https://www.libguestfs.org/guestfs-faq.1.html">libguestfs FAQ</a>):</p>
+<pre><code class="language-bash">mkdir -p &quot;$PWD/guestfs-work&quot;
+sudo install -m 0644 &quot;/boot/vmlinuz-$(uname -r)&quot; &quot;$PWD/guestfs-work/kernel&quot;
+export SUPERMIN_KERNEL=&quot;$PWD/guestfs-work/kernel&quot;
+export SUPERMIN_KERNEL_VERSION=&quot;$(uname -r)&quot;
+export SUPERMIN_MODULES=&quot;/lib/modules/$(uname -r)&quot;
+</code></pre>
+<p>Retry with a new output directory. For other appliance startup failures, set <code>LIBGUESTFS_DEBUG=1 LIBGUESTFS_TRACE=1</code> to capture the underlying error.</p>
+<p>Ubuntu 24.04's <code>passt</code> package can reject libguestfs PID files with <code>Permission denied</code>. The disposable CI builder removes that optional helper to select libguestfs's QEMU user-networking fallback. For local construction, use a dedicated builder VM with this workaround or a distribution with the corrected helper; inspect dependency changes before removing packages on a shared host. The workflow grants only its build user access to <code>/dev/kvm</code> when present. Hardware acceleration is optional but substantially faster than TCG emulation.</p>
 <h2 id="download-verify-and-write">Download, verify and write</h2>
 <p>Only use image assets actually present in a release; a recipe is not evidence that a boot image has passed acceptance. All RC images remain hardware-unverified until the matrix is updated. If published as 1-GiB volumes, download every part and the matching <code>.volumes.json</code>; use the release's <code>release-tools.py</code>:</p>
 <pre><code class="language-powershell">py release-tools.py merge --file .\IMAGE.img.gz.volumes.json --output .\merged
