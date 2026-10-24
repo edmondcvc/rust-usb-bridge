@@ -17,3 +17,6 @@ pub const PIPE_NAME: &str = r"\\.\pipe\RustUsbBridge.Control.v1";
 
 #[cfg(windows)]
 pub mod enrollment;
+
+#[cfg(windows)]
+mod window_lifecycle;

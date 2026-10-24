@@ -21,6 +21,7 @@ const GREEN: Color32 = Color32::from_rgb(20, 110, 77);
 const AMBER: Color32 = Color32::from_rgb(147, 83, 12);
 const RED: Color32 = Color32::from_rgb(166, 43, 43);
 struct UsbApp {
+    window_hook: Option<crate::window_lifecycle::WindowHook>,
     tray: Option<tray_icon::TrayIcon>,
     tray_actions: mpsc::Receiver<bool>,
     force_device: Option<bridge_common::UsbDevice>,
@@ -147,6 +148,7 @@ impl UsbApp {
         let tray = create_tray(context, tray_tx);
         let tray_error = tray.as_ref().err().map(|e| format!("系统托盘初始化失败：{e}。关闭按钮将保留退出确认。"));
         Self {
+            window_hook: None,
             tray: tray.ok(), tray_actions,
             force_device: None,
             help_textures: Default::default(), demo,
@@ -661,7 +663,10 @@ impl eframe::App for UsbApp {
             }
         }
         if self.exit_ready { self.enrollment=None; self.password.zeroize(); }
-        if self.exit_ready { context.send_viewport_cmd(egui::ViewportCommand::Close); }
+        if self.exit_ready {
+            if let Some(hook) = &self.window_hook { hook.allow_exit(); }
+            context.send_viewport_cmd(egui::ViewportCommand::Close);
+        }
         if self.enrollment.is_none() && !self.busy && self.last_poll.elapsed() >= Duration::from_secs(2) {
             self.last_poll = Instant::now();
             self.send(LocalRequest::Snapshot);
@@ -970,6 +975,7 @@ impl Drop for UsbApp {
     fn drop(&mut self) {
         tray_icon::TrayIconEvent::set_event_handler(None::<fn(tray_icon::TrayIconEvent)>);
         tray_icon::menu::MenuEvent::set_event_handler(None::<fn(tray_icon::menu::MenuEvent)>);
+        self.window_hook.take();
         self.tray.take();
     }
 }
@@ -1059,6 +1065,7 @@ fn install_chinese_fonts(context: &egui::Context) {
 }
 
 pub fn run(target: ipc::Target, demo: bool) -> Result<()> {
+    let Some(_instance) = crate::window_lifecycle::Instance::acquire(demo)? else { return Ok(()); };
     let options = eframe::NativeOptions {
         viewport: egui::ViewportBuilder::default()
             .with_inner_size([940.0, 640.0])
@@ -1072,7 +1079,11 @@ pub fn run(target: ipc::Target, demo: bool) -> Result<()> {
             "USB 连接中心"
         },
         options,
-        Box::new(move |context| { let mut app=UsbApp::new(context, target, demo); if demo { app.demo_scene("首次连接"); } Ok(Box::new(app)) }),
+        Box::new(move |context| { let mut app=UsbApp::new(context, target, demo);
+            use raw_window_handle::{HasWindowHandle, RawWindowHandle};
+            let RawWindowHandle::Win32(handle) = context.window_handle()?.as_raw() else { return Err("无法取得主窗口".into()); };
+            app.window_hook = Some(crate::window_lifecycle::WindowHook::install(handle.hwnd.get(), demo, app.tray.is_some())?);
+            if demo { app.demo_scene("首次连接"); } Ok(Box::new(app)) }),
     )
     .map_err(|e| anyhow::anyhow!("启动客户端窗口失败：{e}"))
 }
